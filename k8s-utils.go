@@ -2,11 +2,27 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+func WaitForPodsReadInCluster(ctx context.Context, k8s client.Client) error {
+	ready := false
+	var err error
+	for !ready {
+		ready, err = ArePodsReadyInCluster(ctx, k8s)
+		if err != nil {
+			return err
+		}
+
+		logrus.Info("Waiting on cluster")
+		time.Sleep(10 * time.Second)
+	}
+	return nil
+}
 
 func ArePodsReadyInCluster(ctx context.Context, k8s client.Client) (bool, error) {
 	podList := corev1.PodList{}

@@ -6,7 +6,11 @@ import (
 	"regexp"
 	"strings"
 
+	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
+	sourcev1 "github.com/fluxcd/source-controller/api/v1"
+
 	"k8s.io/apimachinery/pkg/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/kubectl/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctlrconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -18,7 +22,25 @@ func k8sClient() (client.Client, error) {
 		return nil, err
 	}
 
-	k8s, err := client.New(kcfg, client.Options{})
+	scheme := runtime.NewScheme()
+	err = clientgoscheme.AddToScheme(scheme)
+	if err != nil {
+		return nil, err
+	}
+
+	err = sourcev1.AddToScheme(scheme)
+	if err != nil {
+		return nil, err
+	}
+
+	err = kustomizev1.AddToScheme(scheme)
+	if err != nil {
+		return nil, err
+	}
+
+	k8s, err := client.New(kcfg, client.Options{
+		Scheme: scheme,
+	})
 	if err != nil {
 		return nil, err
 	}
