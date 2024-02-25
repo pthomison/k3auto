@@ -19,7 +19,7 @@ func WaitForPodsReadInCluster(ctx context.Context, k8s client.Client) error {
 		}
 
 		logrus.Info("Waiting on cluster")
-		time.Sleep(10 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 	return nil
 }

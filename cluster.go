@@ -7,7 +7,6 @@ import (
 	configtypes "github.com/k3d-io/k3d/v5/pkg/config/types"
 	v1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	"github.com/k3d-io/k3d/v5/pkg/types"
-	"github.com/k3d-io/k3d/v5/version"
 )
 
 var (
@@ -16,7 +15,7 @@ var (
 			Name: "foobar",
 		},
 		Servers: 1,
-		Image:   fmt.Sprintf("%s:%s", types.DefaultK3sImageRepo, version.K3sVersion),
+		Image:   fmt.Sprintf("%s:%s", types.DefaultK3sImageRepo, "v1.29.1-k3s1"),
 		ExposeAPI: v1alpha5.SimpleExposureOpts{
 			HostPort: "6443",
 		},

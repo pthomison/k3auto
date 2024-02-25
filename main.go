@@ -16,21 +16,17 @@ var (
 	rt = runtimes.Docker
 )
 
-func checkError(err error) {
-	if err != nil {
-		logrus.Fatal(err)
-	}
+func init() {
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zap.Options{})))
 }
 
 func main() {
 	ctx := context.TODO()
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zap.Options{})))
-
 	err := DeployCluster(ctx, clusterSimpleCfg)
 	checkError(err)
 
-	time.Sleep(15 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	k8s, err := k8sClient()
 	checkError(err)
@@ -61,5 +57,10 @@ func main() {
 
 	err = k8s.Create(ctx, &kustomization)
 	checkError(err)
+}
 
+func checkError(err error) {
+	if err != nil {
+		logrus.Fatal(err)
+	}
 }
