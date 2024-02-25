@@ -12,7 +12,7 @@ import (
 var (
 	clusterSimpleCfg = &v1alpha5.SimpleConfig{
 		ObjectMeta: configtypes.ObjectMeta{
-			Name: "foobar",
+			Name: "k3auto",
 		},
 		Servers: 1,
 		Image:   fmt.Sprintf("%s:%s", types.DefaultK3sImageRepo, "v1.29.1-k3s1"),

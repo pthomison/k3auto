@@ -5,17 +5,44 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+func WaitForDeployment(ctx context.Context, k8s client.Client, desiredDep v1.ObjectMeta) error {
+	for {
+		deploymentList := appsv1.DeploymentList{}
+		err := k8s.List(ctx, &deploymentList, &client.ListOptions{
+			Namespace: desiredDep.Namespace,
+		})
+		if err != nil {
+			return err
+		}
+
+		for _, dep := range deploymentList.Items {
+			if dep.Name == desiredDep.Name {
+				if dep.Status.ReadyReplicas == *dep.Spec.Replicas {
+					return nil
+				}
+			}
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+}
 
 func WaitForPodsReadInCluster(ctx context.Context, k8s client.Client) error {
 	ready := false
 	var err error
-	for !ready {
+	for {
 		ready, err = ArePodsReadyInCluster(ctx, k8s)
 		if err != nil {
 			return err
+		}
+		if ready {
+			break
 		}
 
 		logrus.Info("Waiting on cluster")
@@ -43,7 +70,9 @@ func ArePodsReadyInCluster(ctx context.Context, k8s client.Client) (bool, error)
 		}
 	}
 
-	logrus.Info("Pods Unready: ", unready)
+	if !clusterReady {
+		logrus.Info("Pods Unready: ", unready)
+	}
 
 	return clusterReady, nil
 }
