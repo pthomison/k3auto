@@ -27,13 +27,20 @@ func BuildAndPushImage(ctx context.Context) error {
 	}
 	defer apiClient.Close()
 
-	buildContext, err := createTarStream(".", "Dockerfile")
+	err = os.WriteFile("k3auto.Dockerfile", []byte(DockerfileString), 0644)
+	if err != nil {
+		return err
+	}
+	defer os.Remove("k3auto.Dockerfile")
+
+	buildContext, err := createTarStream(".", "k3auto.Dockerfile")
 	if err != nil {
 		return err
 	}
 
 	resp, err := apiClient.ImageBuild(ctx, buildContext, types.ImageBuildOptions{
-		Tags: []string{"hackstash:latest"},
+		Tags:       []string{"k3auto-fluxdir:latest"},
+		Dockerfile: "k3auto.Dockerfile",
 	})
 	if err != nil {
 		return err
@@ -44,12 +51,12 @@ func BuildAndPushImage(ctx context.Context) error {
 		return err
 	}
 
-	srcImage, err := alltransports.ParseImageName("docker-daemon:hackstash:latest")
+	srcImage, err := alltransports.ParseImageName("docker-daemon:k3auto-fluxdir:latest")
 	if err != nil {
 		return err
 	}
 
-	destImage, err := alltransports.ParseImageName("docker://127.0.0.1:8888/hackstash:latest")
+	destImage, err := alltransports.ParseImageName("docker://127.0.0.1:8888/k3auto-fluxdir:latest")
 	if err != nil {
 		return err
 	}

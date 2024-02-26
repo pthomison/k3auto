@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"os"
 	"os/exec"
 
@@ -15,11 +16,10 @@ import (
 
 var (
 	rt = runtimes.Docker
-)
 
-// func init() {
-// 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zap.Options{})))
-// }
+	//go:embed Dockerfile
+	DockerfileString string
+)
 
 func main() {
 	ctx := context.TODO()
@@ -43,8 +43,6 @@ func main() {
 	genOps.NetworkPolicy = false
 	fManifest, err := install.Generate(genOps, "")
 	checkError(err)
-	// logrus.Info(fManifest)
-	_, _ = fManifest, ctx
 
 	// Write Controller Manifests to tmp folder
 	fileLoc, err := fManifest.WriteFile(os.TempDir())
@@ -57,30 +55,17 @@ func main() {
 	err = cmd.Run()
 	checkError(err)
 
-	// err = GetCluster(ctx, clusterSimpleCfg)
-	// checkError(err)
-
-	// ---
-
 	err = BuildAndPushImage(ctx)
 	checkError(err)
 
-	// // Create the Bootstrap Flux Resources
-	// // err = k8s.Create(ctx, &secret)
-	// // checkError(err)
-	// // err = k8s.Create(ctx, &gitrepo)
-	// // checkError(err)
+	// Create the Bootstrap Flux Resources
 	err = k8s.Create(ctx, &ocirepo)
 	checkError(err)
 	err = k8s.Create(ctx, &kustomizationOCI)
 	checkError(err)
 
-	// // Wait for the flux
-	// // WaitForDeployment(ctx, k8s, v1.ObjectMeta{
-	// // 	Name:      "metrics-server",
-	// // 	Namespace: "metrics-server",
-	// // })
-	// WaitForPodsReadyInCluster(ctx, k8s)
+	// Wait for the flux
+	WaitForKustomization(ctx, k8s, kustomizationOCI.ObjectMeta)
 
 }
 

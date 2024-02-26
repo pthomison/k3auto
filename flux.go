@@ -19,7 +19,7 @@ var (
 			Interval: v1.Duration{
 				Duration: time.Minute * 5,
 			},
-			URL: "oci://172.17.0.4:5000/hackstash",
+			URL: "oci://172.17.0.4:5000/k3auto-fluxdir",
 			Reference: &sourcev1beta2.OCIRepositoryRef{
 				Tag: "latest",
 			},
