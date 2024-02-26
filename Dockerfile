@@ -1,3 +1,3 @@
 FROM scratch
 
-COPY hack /
+COPY templates /

@@ -32,9 +32,14 @@ func BuildAndPushImage(ctx context.Context) error {
 		return err
 	}
 
-	_, err = apiClient.ImageBuild(ctx, buildContext, types.ImageBuildOptions{
+	resp, err := apiClient.ImageBuild(ctx, buildContext, types.ImageBuildOptions{
 		Tags: []string{"hackstash:latest"},
 	})
+	if err != nil {
+		return err
+	}
+
+	_, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}

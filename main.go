@@ -57,8 +57,8 @@ func main() {
 	err = cmd.Run()
 	checkError(err)
 
-	err = GetCluster(ctx, clusterSimpleCfg)
-	checkError(err)
+	// err = GetCluster(ctx, clusterSimpleCfg)
+	// checkError(err)
 
 	// ---
 
@@ -70,10 +70,10 @@ func main() {
 	// // checkError(err)
 	// // err = k8s.Create(ctx, &gitrepo)
 	// // checkError(err)
-	// err = k8s.Create(ctx, &ocirepo)
-	// checkError(err)
-	// err = k8s.Create(ctx, &kustomizationOCI)
-	// checkError(err)
+	err = k8s.Create(ctx, &ocirepo)
+	checkError(err)
+	err = k8s.Create(ctx, &kustomizationOCI)
+	checkError(err)
 
 	// // Wait for the flux
 	// // WaitForDeployment(ctx, k8s, v1.ObjectMeta{
