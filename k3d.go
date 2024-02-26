@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/davecgh/go-spew/spew"
 	k3dcluster "github.com/k3d-io/k3d/v5/pkg/client"
 	k3dconfig "github.com/k3d-io/k3d/v5/pkg/config"
 	v1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
@@ -47,19 +46,16 @@ func DeployCluster(ctx context.Context, cfg *v1alpha5.SimpleConfig) error {
 	return nil
 }
 
-func GetCluster(ctx context.Context, cfg *v1alpha5.SimpleConfig) error {
-	clusters, err := k3dcluster.ClusterList(ctx, rt)
-	if err != nil {
-		return err
-	}
+// func GetCluster(ctx context.Context, cfg *v1alpha5.SimpleConfig) error {
+// 	clusters, err := k3dcluster.ClusterList(ctx, rt)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	registry, err := k3dcluster.RegistryGet(ctx, rt, "k3auto-registry")
-	if err != nil {
-		return err
-	}
+// 	registry, err := k3dcluster.RegistryGet(ctx, rt, "k3auto-registry")
+// 	if err != nil {
+// 		return err
+// 	}
 
-	spew.Dump(clusters)
-	spew.Dump(registry)
-
-	return nil
-}
+// 	return nil
+// }

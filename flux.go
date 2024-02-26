@@ -45,22 +45,4 @@ var (
 			},
 		},
 	}
-
-	kustomization = kustomizev1.Kustomization{
-		ObjectMeta: v1.ObjectMeta{
-			Name:      "flux-system",
-			Namespace: "flux-system",
-		},
-		Spec: kustomizev1.KustomizationSpec{
-			Interval: v1.Duration{
-				Duration: time.Minute * 10,
-			},
-			Path:  "./clusters/k3d-playground",
-			Prune: true,
-			SourceRef: kustomizev1.CrossNamespaceSourceReference{
-				Kind: "GitRepository",
-				Name: "flux-system",
-			},
-		},
-	}
 )
