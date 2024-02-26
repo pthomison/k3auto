@@ -3,6 +3,7 @@ package main
 import (
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
 	sourcev1 "github.com/fluxcd/source-controller/api/v1"
+	sourcev1beta2 "github.com/fluxcd/source-controller/api/v1beta2"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -28,6 +29,11 @@ func k8sClient() (client.Client, error) {
 	}
 
 	err = kustomizev1.AddToScheme(scheme)
+	if err != nil {
+		return nil, err
+	}
+
+	err = sourcev1beta2.AddToScheme(scheme)
 	if err != nil {
 		return nil, err
 	}

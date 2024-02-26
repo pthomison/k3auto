@@ -5,21 +5,21 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/fluxcd/flux2/v2/pkg/manifestgen/install"
-	"github.com/k3d-io/k3d/v5/pkg/runtimes"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/fluxcd/flux2/v2/pkg/manifestgen/install"
+
+	"github.com/k3d-io/k3d/v5/pkg/runtimes"
 )
 
 var (
 	rt = runtimes.Docker
 )
 
-func init() {
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zap.Options{})))
-}
+// func init() {
+// 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zap.Options{})))
+// }
 
 func main() {
 	ctx := context.TODO()
@@ -43,6 +43,8 @@ func main() {
 	genOps.NetworkPolicy = false
 	fManifest, err := install.Generate(genOps, "")
 	checkError(err)
+	// logrus.Info(fManifest)
+	_, _ = fManifest, ctx
 
 	// Write Controller Manifests to tmp folder
 	fileLoc, err := fManifest.WriteFile(os.TempDir())
@@ -55,20 +57,31 @@ func main() {
 	err = cmd.Run()
 	checkError(err)
 
-	// Create the Bootstrap Flux Resources
-	err = k8s.Create(ctx, &secret)
-	checkError(err)
-	err = k8s.Create(ctx, &gitrepo)
-	checkError(err)
-	err = k8s.Create(ctx, &kustomization)
+	err = GetCluster(ctx, clusterSimpleCfg)
 	checkError(err)
 
-	// Wait for the flux
-	WaitForDeployment(ctx, k8s, v1.ObjectMeta{
-		Name:      "metrics-server",
-		Namespace: "metrics-server",
-	})
-	WaitForPodsReadInCluster(ctx, k8s)
+	// ---
+
+	err = BuildAndPushImage(ctx)
+	checkError(err)
+
+	// // Create the Bootstrap Flux Resources
+	// // err = k8s.Create(ctx, &secret)
+	// // checkError(err)
+	// // err = k8s.Create(ctx, &gitrepo)
+	// // checkError(err)
+	// err = k8s.Create(ctx, &ocirepo)
+	// checkError(err)
+	// err = k8s.Create(ctx, &kustomizationOCI)
+	// checkError(err)
+
+	// // Wait for the flux
+	// // WaitForDeployment(ctx, k8s, v1.ObjectMeta{
+	// // 	Name:      "metrics-server",
+	// // 	Namespace: "metrics-server",
+	// // })
+	// WaitForPodsReadyInCluster(ctx, k8s)
+
 }
 
 func checkError(err error) {

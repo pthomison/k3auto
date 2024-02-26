@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"time"
 
-	configtypes "github.com/k3d-io/k3d/v5/pkg/config/types"
+	k3dconfigtypes "github.com/k3d-io/k3d/v5/pkg/config/types"
 	v1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
-	"github.com/k3d-io/k3d/v5/pkg/types"
+	k3dtypes "github.com/k3d-io/k3d/v5/pkg/types"
 )
 
 var (
 	clusterSimpleCfg = &v1alpha5.SimpleConfig{
-		ObjectMeta: configtypes.ObjectMeta{
+		ObjectMeta: k3dconfigtypes.ObjectMeta{
 			Name: "k3auto",
 		},
 		Servers: 1,
-		Image:   fmt.Sprintf("%s:%s", types.DefaultK3sImageRepo, "v1.29.1-k3s1"),
+		Image:   fmt.Sprintf("%s:%s", k3dtypes.DefaultK3sImageRepo, "v1.29.1-k3s1"),
 		ExposeAPI: v1alpha5.SimpleExposureOpts{
 			HostPort: "6443",
 		},
@@ -43,6 +43,12 @@ var (
 				SwitchCurrentContext:    true,
 			},
 			Runtime: v1alpha5.SimpleConfigOptionsRuntime{},
+		},
+		Registries: v1alpha5.SimpleConfigRegistries{
+			Create: &v1alpha5.SimpleConfigRegistryCreateConfig{
+				Name:     "k3auto-registry",
+				HostPort: "8888",
+			},
 		},
 	}
 )
