@@ -37,4 +37,5 @@ tasks:
         -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
         -w "{{.ROOT_DIR}}"
         {{.REPO}}:testing-{{.GIT_REV}}
+        git config --global --add safe.directory /home/runner/work/k3auto/k3auto &&
         task test
