@@ -95,6 +95,12 @@ jobs:
         run: "docker ps -a"
         shell: bash
 
-      - name: Run Test Suite
-        run: "go test . -v --count=1"
-        shell: bash
+      - name: Install Task
+        uses: arduino/setup-task@v2
+
+      - name: Task Test
+        run: "task docker-test"
+
+      # - name: Run Test Suite
+      #   run: "go test . -v --count=1"
+      #   shell: bash
