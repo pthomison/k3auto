@@ -1,0 +1,40 @@
+version: "3"
+
+vars:
+  REPO: 362159410824.dkr.ecr.us-east-2.amazonaws.com/k3auto
+  GIT_REV:
+    sh: git rev-parse --short HEAD
+
+tasks:
+  run:
+    cmds:
+      - go run .
+
+  # build:
+  #   cmds:
+  #     - go run .
+
+  # git rev-parse --short HEAD
+
+  test:
+    cmds:
+      - go test . -v --count=1
+
+  docker-test-image:
+    cmds:
+      - >
+        docker build . 
+        -f testing.Dockerfile 
+        -t {{.REPO}}:testing-{{.GIT_REV}}
+
+  docker-test:
+    cmds:
+      - task: docker-test-image
+      - >
+        docker run -it --rm
+        --network host
+        -v "/var/run/docker.sock:/var/run/docker.sock"
+        -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
+        -w "{{.ROOT_DIR}}"
+        {{.REPO}}:testing-{{.GIT_REV}}
+        task test
