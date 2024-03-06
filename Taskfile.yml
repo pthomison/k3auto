@@ -31,7 +31,7 @@ tasks:
     cmds:
       - task: docker-test-image
       - >
-        docker run -it --rm
+        docker run --rm
         --network host
         -v "/var/run/docker.sock:/var/run/docker.sock"
         -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
