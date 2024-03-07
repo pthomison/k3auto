@@ -37,5 +37,15 @@ tasks:
         -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
         -w "{{.ROOT_DIR}}"
         {{.REPO}}:testing-{{.GIT_REV}}
-        git config --global --add safe.directory /home/runner/work/k3auto/k3auto &&
-        task test
+
+  docker-shell:
+    cmds:
+      - task: docker-test-image
+      - >
+        docker run --rm -it
+        --network host
+        -v "/var/run/docker.sock:/var/run/docker.sock"
+        -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
+        -w "{{.ROOT_DIR}}"
+        --entrypoint="/bin/bash"
+        {{.REPO}}:testing-{{.GIT_REV}}
