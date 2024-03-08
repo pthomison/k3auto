@@ -79,7 +79,7 @@ func TestEndToEnd(t *testing.T) {
 	err = k8s.List(ctx, &deploymentList)
 	assert.Nil(t, err)
 
-	time.Sleep(20 * time.Second)
+	time.Sleep(30 * time.Second)
 
 	for _, dep := range deploymentList.Items {
 		spew.Dump(dep.Name, dep.Namespace)
