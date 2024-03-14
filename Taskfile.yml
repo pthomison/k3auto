@@ -2,8 +2,8 @@ version: "3"
 
 vars:
   REPO: 362159410824.dkr.ecr.us-east-2.amazonaws.com/k3auto
-  GIT_REV: foobar
-  # sh: git rev-parse --short HEAD
+  GIT_REV:
+    sh: git rev-parse --short HEAD
 
 tasks:
   run:
@@ -46,10 +46,13 @@ tasks:
     cmds:
       - task: docker-test-image
       - >
-        docker run --rm -it
+        docker run --rm -t
         --network host
         -v "/var/run/docker.sock:/var/run/docker.sock"
         -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
         -w "{{.ROOT_DIR}}"
-        --entrypoint="/bin/bash"
+        -e "KUBECONFIG=/tmp/config"
+        -e "GOCACHE=/tmp/.cache/go-build"
+        -u "$(id -u):$(id -g)" --group-add "0"
+        {{.REPO}}:testing-{{.GIT_REV}}
         {{.REPO}}:testing-{{.GIT_REV}}
