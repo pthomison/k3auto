@@ -99,7 +99,7 @@ jobs:
         uses: arduino/setup-task@v2
 
       - name: Task Test
-        run: "id && ls -alh /home/runner/work/k3auto/k3auto && git config --global --add safe.directory /home/runner/work/k3auto/k3auto && task docker-test"
+        run: "id && ls -alh /home/runner/work/k3auto/k3auto && git config --global --add safe.directory /home/runner/work/k3auto/k3auto && task docker-cicd-test"
 
       # - name: Run Test Suite
       #   run: "go test . -v --count=1"

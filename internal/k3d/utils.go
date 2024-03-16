@@ -1,4 +1,4 @@
-package main
+package k3d
 
 import (
 	"context"
@@ -9,13 +9,13 @@ import (
 	"github.com/k3d-io/k3d/v5/pkg/runtimes"
 )
 
-func DeployCluster(ctx context.Context, cfg *v1alpha5.SimpleConfig) error {
-	err := k3dconfig.ProcessSimpleConfig(clusterSimpleCfg)
+func DeployCluster(ctx context.Context, cfg *v1alpha5.SimpleConfig, rt runtimes.Runtime) error {
+	err := k3dconfig.ProcessSimpleConfig(cfg)
 	if err != nil {
 		return err
 	}
 
-	clusterConfig, err := k3dconfig.TransformSimpleToClusterConfig(ctx, rt, *clusterSimpleCfg)
+	clusterConfig, err := k3dconfig.TransformSimpleToClusterConfig(ctx, rt, *cfg)
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func DeployCluster(ctx context.Context, cfg *v1alpha5.SimpleConfig) error {
 		&k3dcluster.WriteKubeConfigOptions{
 			UpdateExisting:       true,
 			OverwriteExisting:    true,
-			UpdateCurrentContext: clusterSimpleCfg.Options.KubeconfigOptions.SwitchCurrentContext,
+			UpdateCurrentContext: cfg.Options.KubeconfigOptions.SwitchCurrentContext,
 		},
 	)
 	if err != nil {
@@ -45,17 +45,3 @@ func DeployCluster(ctx context.Context, cfg *v1alpha5.SimpleConfig) error {
 
 	return nil
 }
-
-// func GetCluster(ctx context.Context, cfg *v1alpha5.SimpleConfig) error {
-// 	clusters, err := k3dcluster.ClusterList(ctx, rt)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	registry, err := k3dcluster.RegistryGet(ctx, rt, "k3auto-registry")
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }

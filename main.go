@@ -12,6 +12,10 @@ import (
 	"github.com/fluxcd/flux2/v2/pkg/manifestgen/install"
 
 	"github.com/k3d-io/k3d/v5/pkg/runtimes"
+
+	"github.com/pthomison/k3auto/internal/flux"
+	"github.com/pthomison/k3auto/internal/k3d"
+	"github.com/pthomison/k3auto/internal/k8s"
 )
 
 var (
@@ -25,15 +29,15 @@ func main() {
 	ctx := context.TODO()
 
 	// Deploy the cluster defined in cluster.go
-	err := DeployCluster(ctx, clusterSimpleCfg)
+	err := k3d.DeployCluster(ctx, clusterSimpleCfg, rt)
 	checkError(err)
 
 	// Generate a k8s client from standard kubeconfig
-	k8s, err := k8sClient()
+	k8sC, err := k8sClient()
 	checkError(err)
 
 	// Wait for the base cluster deployments to be ready
-	WaitForDeployment(ctx, k8s, v1.ObjectMeta{
+	k8s.WaitForDeployment(ctx, k8sC, v1.ObjectMeta{
 		Name:      "coredns",
 		Namespace: "kube-system",
 	})
@@ -59,13 +63,13 @@ func main() {
 	checkError(err)
 
 	// Create the Bootstrap Flux Resources
-	err = k8s.Create(ctx, &ocirepo)
+	err = k8sC.Create(ctx, &ocirepo)
 	checkError(err)
-	err = k8s.Create(ctx, &kustomizationOCI)
+	err = k8sC.Create(ctx, &kustomizationOCI)
 	checkError(err)
 
 	// Wait for the flux
-	WaitForKustomization(ctx, k8s, kustomizationOCI.ObjectMeta)
+	flux.WaitForKustomization(ctx, k8sC, kustomizationOCI.ObjectMeta)
 
 }
 
