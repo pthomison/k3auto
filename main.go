@@ -13,6 +13,7 @@ import (
 
 	"github.com/k3d-io/k3d/v5/pkg/runtimes"
 
+	"github.com/pthomison/k3auto/internal/docker"
 	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/pthomison/k3auto/internal/k8s"
@@ -22,7 +23,7 @@ var (
 	rt = runtimes.Docker
 
 	//go:embed Dockerfile
-	DockerfileString string
+	dockerfileString string
 )
 
 func main() {
@@ -59,7 +60,7 @@ func main() {
 	err = cmd.Run()
 	checkError(err)
 
-	err = BuildAndPushImage(ctx)
+	err = docker.BuildAndPushImage(ctx, dockerfileString)
 	checkError(err)
 
 	// Create the Bootstrap Flux Resources

@@ -1,4 +1,4 @@
-package main
+package docker
 
 import (
 	"context"
@@ -20,7 +20,7 @@ import (
 	"github.com/moby/patternmatcher"
 )
 
-func BuildAndPushImage(ctx context.Context) error {
+func BuildAndPushImage(ctx context.Context, DockerfileString string) error {
 	apiClient, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err

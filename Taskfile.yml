@@ -10,12 +10,6 @@ tasks:
     cmds:
       - go run .
 
-  # build:
-  #   cmds:
-  #     - go run .
-
-  # git rev-parse --short HEAD
-
   test:
     cmds:
       - go test . -v --count=1
