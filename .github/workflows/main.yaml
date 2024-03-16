@@ -22,28 +22,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # linting:
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         # linter needs the full git history to get the list of files that
-  #         # changed across commits
-  #         fetch-depth: 0
-
-  #     - uses: actions/setup-go@v5
-  #       with:
-  #         go-version: "1.22"
-  #         cache: false
-
-  #     - name: golangci-lint
-  #       uses: golangci/golangci-lint-action@v4
-  #       with:
-  #         version: v1.54
-  #         args: --timeout=30m
-
   # testing-image:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -99,8 +77,4 @@ jobs:
         uses: arduino/setup-task@v2
 
       - name: Task Test
-        run: "id && ls -alh /home/runner/work/k3auto/k3auto && git config --global --add safe.directory /home/runner/work/k3auto/k3auto && task docker-cicd-test"
-
-      # - name: Run Test Suite
-      #   run: "go test . -v --count=1"
-      #   shell: bash
+        run: "task docker-cicd-test"
