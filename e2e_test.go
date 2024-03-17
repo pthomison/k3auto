@@ -8,12 +8,14 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	k3dclient "github.com/k3d-io/k3d/v5/pkg/client"
 	"github.com/k3d-io/k3d/v5/pkg/types"
+	"github.com/pthomison/k3auto/internal/k8s"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	appsv1 "k8s.io/api/apps/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apimachinerytypes "k8s.io/apimachinery/pkg/types"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -72,32 +74,42 @@ func TestEndToEnd(t *testing.T) {
 	_ = cleanupFn
 	assert.Nil(t, err)
 
-	k8s, err := k8sClient()
+	k8sC, err := k8sClient()
 	assert.Nil(t, err)
 
 	deploymentList := appsv1.DeploymentList{}
-	err = k8s.List(ctx, &deploymentList)
+	err = k8sC.List(ctx, &deploymentList)
 	assert.Nil(t, err)
 
-	time.Sleep(30 * time.Second)
+	timeout := time.NewTimer(60 * time.Second)
+	go func() {
+		<-timeout.C
+		assert.FailNow(t, "Environment Timed-Out While Deploying")
+	}()
+
+	err = k8s.WaitForDeployment(ctx, k8sC, v1.ObjectMeta{
+		Name:      "notification-controller",
+		Namespace: "flux-system",
+	})
+	assert.Nil(t, err)
 
 	for _, dep := range deploymentList.Items {
 		spew.Dump(dep.Name, dep.Namespace)
 	}
 
-	hcReady, err := DeploymentReady(ctx, k8s, "helm-controller", "flux-system")
+	hcReady, err := DeploymentReady(ctx, k8sC, "helm-controller", "flux-system")
 	assert.Nil(t, err)
 	assert.True(t, hcReady)
 
-	kcReady, err := DeploymentReady(ctx, k8s, "kustomize-controller", "flux-system")
+	kcReady, err := DeploymentReady(ctx, k8sC, "kustomize-controller", "flux-system")
 	assert.Nil(t, err)
 	assert.True(t, kcReady)
 
-	ncReady, err := DeploymentReady(ctx, k8s, "notification-controller", "flux-system")
+	ncReady, err := DeploymentReady(ctx, k8sC, "notification-controller", "flux-system")
 	assert.Nil(t, err)
 	assert.True(t, ncReady)
 
-	scReady, err := DeploymentReady(ctx, k8s, "source-controller", "flux-system")
+	scReady, err := DeploymentReady(ctx, k8sC, "source-controller", "flux-system")
 	assert.Nil(t, err)
 	assert.True(t, scReady)
 }
