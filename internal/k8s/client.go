@@ -1,4 +1,4 @@
-package main
+package k8s
 
 import (
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
@@ -11,7 +11,7 @@ import (
 	ctlrconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
-func k8sClient() (client.Client, error) {
+func NewClient() (client.Client, error) {
 	kcfg, err := ctlrconfig.GetConfig()
 	if err != nil {
 		return nil, err
@@ -22,17 +22,14 @@ func k8sClient() (client.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	err = sourcev1.AddToScheme(scheme)
 	if err != nil {
 		return nil, err
 	}
-
 	err = kustomizev1.AddToScheme(scheme)
 	if err != nil {
 		return nil, err
 	}
-
 	err = sourcev1beta2.AddToScheme(scheme)
 	if err != nil {
 		return nil, err

@@ -3,7 +3,7 @@ version: "3"
 vars:
   REPO: 362159410824.dkr.ecr.us-east-2.amazonaws.com/k3auto
   GIT_REV:
-    sh: git rev-parse --short HEAD
+    sh: git -c safe.directory={{.ROOT_DIR}}  rev-parse --short HEAD
 
 tasks:
   run:
@@ -12,7 +12,7 @@ tasks:
 
   test:
     cmds:
-      - go test . -v --count=1
+      - go test ./... -v --count=1
 
   docker-test-image:
     cmds:
@@ -20,21 +20,6 @@ tasks:
         docker build . 
         -f testing.Dockerfile 
         -t {{.REPO}}:testing-{{.GIT_REV}}
-
-  docker-cicd-test:
-    cmds:
-      - task: docker-test-image
-      - >
-        docker run --rm -t
-        --network host
-        -v "/var/run/docker.sock:/var/run/docker.sock"
-        -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
-        -w "{{.ROOT_DIR}}"
-        -e "KUBECONFIG=/tmp/config"
-        -e "GOCACHE=/tmp/.cache/go-build"
-        -u "$(id -u):$(id -g)" --group-add "0"
-        {{.REPO}}:testing-{{.GIT_REV}}
-        task test
 
   docker-test:
     cmds:

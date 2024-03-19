@@ -6,9 +6,10 @@ import (
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	apimachinerytypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"k8s.io/client-go/kubernetes/scheme"
@@ -18,7 +19,20 @@ import (
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 )
 
-func WaitForDeployment(ctx context.Context, k8s client.Client, desiredDep v1.ObjectMeta) error {
+func DeploymentReady(ctx context.Context, k8s client.Client, name string, namespace string) (bool, error) {
+	dp := appsv1.Deployment{}
+	err := k8s.Get(ctx, apimachinerytypes.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}, &dp)
+	if err != nil {
+		return false, err
+	}
+
+	return (dp.Status.ReadyReplicas == *dp.Spec.Replicas), nil
+}
+
+func WaitForDeployment(ctx context.Context, k8s client.Client, desiredDep metav1.ObjectMeta) error {
 	for {
 		deploymentList := appsv1.DeploymentList{}
 		err := k8s.List(ctx, &deploymentList, &client.ListOptions{

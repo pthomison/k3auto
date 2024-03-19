@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/viper"
 
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
@@ -57,7 +56,7 @@ func TestDecodeK3dConfig(t *testing.T) {
 
 	assert.NotNil(t, cfg)
 
-	spew.Dump(cfg)
+	// spew.Dumdo(cfg)
 }
 
 func TestCheckType(t *testing.T) {
