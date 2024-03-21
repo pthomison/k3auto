@@ -14,6 +14,14 @@ tasks:
     cmds:
       - go test ./... -v --count=1
 
+  hack:
+    cmds:
+      - go test ./hack/... -v --count=1
+
+  e2e:
+    cmds:
+      - go test ./e2e/... -v --count=1
+
   docker-test-image:
     cmds:
       - >
@@ -23,24 +31,26 @@ tasks:
 
   docker-test:
     cmds:
-      - task: docker-test-image
-      - >
-        docker run --rm -t
-        --network host
-        -v "/var/run/docker.sock:/var/run/docker.sock"
-        -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
-        -w "{{.ROOT_DIR}}"
-        {{.REPO}}:testing-{{.GIT_REV}}
-        task test
+      - task: docker
+        vars:
+          DOCKER_CMD: task test
 
   docker-shell:
+    cmds:
+      - task: docker
+        vars:
+          DOCKER_CMD: /bin/bash
+          DOCKER_RUN_EXTRA_FLAGS: "-i"
+
+  docker:
     cmds:
       - task: docker-test-image
       - >
         docker run --rm -t
+        {{.DOCKER_RUN_EXTRA_FLAGS}}
         --network host
         -v "/var/run/docker.sock:/var/run/docker.sock"
         -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
         -w "{{.ROOT_DIR}}"
         {{.REPO}}:testing-{{.GIT_REV}}
-        /bin/bash
+        {{.DOCKER_CMD}}

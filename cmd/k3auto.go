@@ -6,10 +6,12 @@ import (
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	"github.com/k3d-io/k3d/v5/pkg/runtimes"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	defaults "github.com/pthomison/k3auto/default"
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/pthomison/k3auto/internal/k8s"
 )
@@ -23,27 +25,22 @@ var K3AutoCmd = &cobra.Command{
 	Run: k3AutoRun,
 }
 
+const ()
+
 var (
-	ClusterConfigFileFlag string
+	ClusterConfigFileFlag   string
+	DeploymentDirectoryFlag string
+	MinimalFlag             bool
 )
 
 func init() {
-	// cobra.OnInitialize(initConfig)
-
-	K3AutoCmd.PersistentFlags().StringVar(&ClusterConfigFileFlag, "cluster-config", "./cluster-config.yaml", "")
-	// rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "author name for copyright attribution")
-	// rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "name of license for the project")
-	// rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
-	// viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
-	// viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
-	// viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	// viper.SetDefault("license", "apache")
-
-	// rootCmd.AddCommand(addCmd)
-	// rootCmd.AddCommand(initCmd)
+	K3AutoCmd.PersistentFlags().StringVarP(&ClusterConfigFileFlag, "cluster-config", "c", "", "Override Cluster Config File")
+	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")
+	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster")
 }
 
 func k3AutoRun(cmd *cobra.Command, args []string) {
+
 	ctx := cmd.Context()
 	if ctx == nil {
 		ctx = context.Background()
@@ -51,8 +48,19 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 
 	rt := runtimes.Docker
 
+	var clusterConfig *k3dv1alpha5.SimpleConfig
+	var err error
+
+	if ClusterConfigFileFlag != "" {
+		clusterConfig, err = k3d.ParseConfigFile(ClusterConfigFileFlag, nil)
+		checkError(err)
+	} else {
+		clusterConfig, err = k3d.ParseConfigFile(defaults.K3dConfigLocation, &defaults.K3dConfig)
+		checkError(err)
+	}
+
 	// Deploy the cluster defined in cluster.go
-	err := k3d.DeployCluster(ctx, clusterSimpleCfg, rt)
+	err = k3d.DeployCluster(ctx, clusterConfig, rt)
 	checkError(err)
 
 	// Generate a k8s client from standard kubeconfig
@@ -98,5 +106,6 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 func checkError(err error) {
 	if err != nil {
 		logrus.Fatal(err)
+		panic(err)
 	}
 }

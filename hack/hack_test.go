@@ -4,6 +4,8 @@ import (
 	"os"
 	"testing"
 
+	defaults "github.com/pthomison/k3auto/default"
+	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
@@ -15,9 +17,9 @@ import (
 )
 
 const (
-	deploymentLocation    = "./test-deployment.yaml"
-	kustomizationLocation = "./test-kustomization.yaml"
-	k3dConfigLocation     = "./test-k3dconfig.yaml"
+	deploymentLocation    = "test-deployment.yaml"
+	kustomizationLocation = "test-kustomization.yaml"
+	k3dConfigLocation     = "test-k3dconfig.yaml"
 )
 
 func TestDecodeDeployment(t *testing.T) {
@@ -56,9 +58,27 @@ func TestDecodeK3dConfig(t *testing.T) {
 
 	assert.NotNil(t, cfg)
 
-	// spew.Dumdo(cfg)
+	// spew.Dump(config.AllKeys())
 }
 
-func TestCheckType(t *testing.T) {
+func TestEmbededK3dConfig(t *testing.T) {
+	config := viper.New()
+	config.SetFs(afero.FromIOFS{FS: defaults.K3dConfig})
+	config.SetConfigFile(defaults.K3dConfigLocation)
 
+	if err := config.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			t.Error(err)
+		}
+		t.Error(err)
+	}
+
+	cfg, err := k3dconfig.FromViper(config)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.NotNil(t, cfg)
+
+	// spew.Dump(cfg)
 }

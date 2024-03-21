@@ -1,0 +1,34 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: k3auto
+servers: 1
+image: docker.io/rancher/k3s:v1.29.1-k3s1
+network: bridge
+kubeAPI:
+  hostPort: "6443"
+options:
+  k3d:
+    wait: true
+    timeout: 3m0s
+    disableLoadbalancer: true
+
+  k3s:
+    extraArgs:
+      - arg: --disable=servicelb,traefik,metrics-server
+        nodeFilters:
+          - server:*
+      - arg: --disable-network-policy
+        nodeFilters:
+          - server:*
+
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
+
+  runtime: {}
+
+registries:
+  create:
+    name: k3auto-registry
+    hostPort: "8888"

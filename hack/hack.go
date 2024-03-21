@@ -1,6 +1,8 @@
 package hack
 
 import (
+	"embed"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -8,6 +10,11 @@ import (
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+)
+
+var (
+	//go:embed *.yaml
+	K3dConfig embed.FS
 )
 
 func deserialize(data []byte) (runtime.Object, *schema.GroupVersionKind, error) {

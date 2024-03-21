@@ -83,7 +83,6 @@ func TestEndToEnd(t *testing.T) {
 		}
 	}()
 
-	// ctx := context.TODO()
 	cleanupFn, err := SetupEnvironment(ctx)
 	defer cleanupFn(ctx)
 	assert.Nil(t, err)

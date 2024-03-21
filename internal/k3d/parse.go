@@ -1,16 +1,23 @@
 package k3d
 
 import (
+	"embed"
 	"errors"
 
+	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 
 	k3dconfig "github.com/k3d-io/k3d/v5/pkg/config"
 	v1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 )
 
-func ParseConfigFile(confLocation string) (*v1alpha5.SimpleConfig, error) {
+func ParseConfigFile(confLocation string, embedFs *embed.FS) (*v1alpha5.SimpleConfig, error) {
 	config := viper.New()
+
+	if embedFs != nil {
+		config.SetFs(afero.FromIOFS{FS: *embedFs})
+	}
+
 	config.SetConfigFile(confLocation)
 
 	if err := config.ReadInConfig(); err != nil {
