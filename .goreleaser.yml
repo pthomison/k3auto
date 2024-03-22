@@ -1,0 +1,47 @@
+project_name: k3auto
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+brews:
+  - tap:
+      owner: pthomison
+      name: homebrew-tools
+
+    # install: |
+    #   bin.install "exoskeleton"
+    #   ln_s bin/"exoskeleton", bin/"exo"
+
+nfpms:
+  - maintainer: tbd
+    formats:
+      - apk
+      - deb
+      - rpm
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+before:
+  hooks:
+    - go mod tidy
+    - go fmt ./...
