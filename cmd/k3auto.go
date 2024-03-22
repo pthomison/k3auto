@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	_ "embed"
+	"os"
+	"path"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -12,8 +14,11 @@ import (
 	"github.com/spf13/cobra"
 
 	defaults "github.com/pthomison/k3auto/default"
+	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/pthomison/k3auto/internal/k8s"
+
+	kubectl "k8s.io/kubectl/pkg/cmd"
 )
 
 var K3AutoCmd = &cobra.Command{
@@ -73,7 +78,57 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 		Namespace: "kube-system",
 	})
 
+	// deploymentFiles, err := defaults.DefaultDeployments.ReadDir("deployments")
+	// checkError(err)
+
+	// for _, v := range deploymentFiles {
+	// 	f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("deployments/%v", v.Name()))
+	// 	checkError(err)
+	// 	defer f.Close()
+
+	// 	fb, err := io.ReadAll(f)
+	// 	checkError(err)
+
+	// 	objs := bytes.Split(fb, []byte("---"))
+
+	// 	for _, obj := range objs {
+	// 		if len(obj) != 0 {
+	// 			obj, objType, err := k8s.ParseManifest(obj)
+	// 			checkError(err)
+
+	// 			_ = obj
+	// 			_ = objType
+	// 			spew.Dump(obj, objType)
+
+	// 			err = k8sC.Create(ctx, obj.(client.Object))
+	// 			checkError(err)
+
+	// 		}
+	// 	}
+
+	// }
+
 	// Generate Flux Controller Manifests
+	fluxManifests, err := flux.GenerateManifests()
+	checkError(err)
+
+	// spew.Dump(fluxManifests)
+
+	tmpDirLoc, err := os.MkdirTemp("", "k3auto-")
+	checkError(err)
+	defer os.RemoveAll(tmpDirLoc)
+
+	fluxManifestsPath := path.Join(tmpDirLoc, "flux-manifests.yaml")
+	os.WriteFile(fluxManifestsPath, []byte(fluxManifests.Content), 0644)
+
+	// err = k8s.Apply(ctx, k8sC, []byte(fluxManifests.Content))
+	// checkError(err)
+
+	kubectlCmd := kubectl.NewDefaultKubectlCommand()
+	kubectlCmd.SetArgs([]string{"apply", "-f", fluxManifestsPath})
+	err = kubectlCmd.Execute()
+	checkError(err)
+
 	// genOps := install.MakeDefaultOptions()
 	// genOps.NetworkPolicy = false
 	// fManifest, err := install.Generate(genOps, "")
@@ -84,8 +139,8 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 	// checkError(err)
 	// defer os.Remove(fileLoc)
 
-	// // Apply Controller Manifests
-	// // TODO: Figure out a way to do this w/o exec & kubectl
+	// Apply Controller Manifests
+	// TODO: Figure out a way to do this w/o exec & kubectl
 	// cmd := exec.Command("kubectl", "apply", "-f", fileLoc)
 	// err = cmd.Run()
 	// checkError(err)

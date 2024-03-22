@@ -1,10 +1,15 @@
 package hack
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"os"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	defaults "github.com/pthomison/k3auto/default"
+	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 
@@ -20,6 +25,7 @@ const (
 	deploymentLocation    = "test-deployment.yaml"
 	kustomizationLocation = "test-kustomization.yaml"
 	k3dConfigLocation     = "test-k3dconfig.yaml"
+	crdConfigLocation     = "test-crd.yaml"
 )
 
 func TestDecodeDeployment(t *testing.T) {
@@ -40,6 +46,23 @@ func TestDecodeKustomization(t *testing.T) {
 	assert.IsTypef(t, obj, &kustomizev1.Kustomization{}, "Decoded Object Is Not appsv1.Deployment")
 }
 
+func TestDecodeCRD(t *testing.T) {
+
+	// spew.Dump(yb)
+
+	// cmd := kubectl.NewDefaultKubectlCommand()
+	// cmd.SetArgs([]string{"describe"})
+	// err = cmd.Execute()
+	// assert.Nil(t, err)
+
+	// var crd apiextensionsv1
+
+	// obj, _, err := deserialize(yb)
+	// assert.Nil(t, err)
+
+	// assert.IsTypef(t, obj, &kustomizev1.Kustomization{}, "Decoded Object Is Not appsv1.Deployment")
+}
+
 func TestDecodeK3dConfig(t *testing.T) {
 	config := viper.New()
 	config.SetConfigFile(k3dConfigLocation)
@@ -57,8 +80,6 @@ func TestDecodeK3dConfig(t *testing.T) {
 	}
 
 	assert.NotNil(t, cfg)
-
-	// spew.Dump(config.AllKeys())
 }
 
 func TestEmbededK3dConfig(t *testing.T) {
@@ -79,6 +100,40 @@ func TestEmbededK3dConfig(t *testing.T) {
 	}
 
 	assert.NotNil(t, cfg)
+}
 
-	// spew.Dump(cfg)
+func TestParseTypes(t *testing.T) {
+	spew.Dump()
+
+	files, err := defaults.DefaultDeployments.ReadDir("deployments")
+	assert.Nil(t, err)
+
+	for _, v := range files {
+		spew.Dump(v)
+		f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("deployments/%v", v.Name()))
+		assert.Nil(t, err)
+		defer f.Close()
+
+		fb, err := io.ReadAll(f)
+		assert.Nil(t, err)
+
+		objs := bytes.Split(fb, []byte("---"))
+
+		for _, obj := range objs {
+			if len(obj) != 0 {
+				obj, objType, err := deserialize(obj)
+				assert.Nil(t, err)
+
+				_ = obj
+				_ = objType
+				// spew.Dump(obj, objType)
+			}
+		}
+
+	}
+}
+
+func TestFluxManifests(t *testing.T) {
+	return
+	spew.Dump(flux.GenerateManifests())
 }

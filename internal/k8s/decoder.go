@@ -1,10 +1,7 @@
-package hack
+package k8s
 
 import (
-	"embed"
-
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
 
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
@@ -22,12 +19,7 @@ import (
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 )
 
-var (
-	//go:embed *.yaml
-	K3dConfig embed.FS
-)
-
-func deserialize(data []byte) (runtime.Object, *schema.GroupVersionKind, error) {
+func NewDecoder() runtime.Decoder {
 	apiextensionsv1.AddToScheme(scheme.Scheme)
 	apiextensionsv1beta1.AddToScheme(scheme.Scheme)
 
@@ -44,10 +36,5 @@ func deserialize(data []byte) (runtime.Object, *schema.GroupVersionKind, error) 
 
 	decoder := scheme.Codecs.UniversalDeserializer()
 
-	runtimeObject, groupVersionKind, err := decoder.Decode(data, nil, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return runtimeObject, groupVersionKind, nil
+	return decoder
 }

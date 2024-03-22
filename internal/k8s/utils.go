@@ -11,12 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	apimachinerytypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"k8s.io/client-go/kubernetes/scheme"
-
-	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 )
 
 func DeploymentReady(ctx context.Context, k8s client.Client, name string, namespace string) (bool, error) {
@@ -60,21 +54,15 @@ func ParseManifestFile(fileLocation string) (runtime.Object, *schema.GroupVersio
 		return nil, nil, err
 	}
 
+	return ParseManifest(b)
+}
+
+func ParseManifest(manifestData []byte) (runtime.Object, *schema.GroupVersionKind, error) {
 	decoder := NewDecoder()
-	runtimeObject, groupVersionKind, err := decoder.Decode(b, nil, nil)
+	runtimeObject, groupVersionKind, err := decoder.Decode(manifestData, nil, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return runtimeObject, groupVersionKind, nil
-}
-
-func NewDecoder() runtime.Decoder {
-	apiextensionsv1.AddToScheme(scheme.Scheme)
-	apiextensionsv1beta1.AddToScheme(scheme.Scheme)
-	kustomizev1.AddToScheme(scheme.Scheme)
-
-	decoder := scheme.Codecs.UniversalDeserializer()
-
-	return decoder
 }

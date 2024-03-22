@@ -12,6 +12,6 @@ var (
 	//go:embed k3d-config.yaml
 	K3dConfig embed.FS
 
-	//go:embed deployments
+	//go:embed deployments/*
 	DefaultDeployments embed.FS
 )

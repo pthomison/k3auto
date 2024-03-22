@@ -103,4 +103,22 @@ func TestEndToEnd(t *testing.T) {
 		Namespace: "kube-system",
 	})
 	assert.Nil(t, err)
+
+	err = k8s.WaitForDeployment(ctx, k8sC, metav1.ObjectMeta{
+		Name:      "helm-controller",
+		Namespace: "flux-system",
+	})
+	assert.Nil(t, err)
+
+	err = k8s.WaitForDeployment(ctx, k8sC, metav1.ObjectMeta{
+		Name:      "kustomize-controller",
+		Namespace: "flux-system",
+	})
+	assert.Nil(t, err)
+
+	// cmd := kubectl.NewDefaultKubectlCommand()
+	// cmd.SetArgs([]string{"apply", "-f", "../hack/test-crd.yaml"})
+	// err = cmd.Execute()
+	// assert.Nil(t, err)
+
 }
