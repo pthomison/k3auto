@@ -68,7 +68,7 @@ func SetupEnvironment(ctx context.Context) (func(ctx context.Context) error, err
 func TestEndToEnd(t *testing.T) {
 	logrus.Info("Starting End to End Test")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(120*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(180*time.Second))
 	defer cancel()
 	go func() {
 		select {

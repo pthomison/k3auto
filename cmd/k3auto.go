@@ -12,7 +12,9 @@ import (
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	// ctrl "sigs.k8s.io/controller-runtime"
+	// "sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/davecgh/go-spew/spew"
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
@@ -24,8 +26,6 @@ import (
 	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/pthomison/k3auto/internal/k8s"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	kubectl "k8s.io/kubectl/pkg/cmd"
 )
@@ -52,10 +52,10 @@ func init() {
 	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")
 	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster")
 
-	opts := zap.Options{
-		Development: true,
-	}
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	// opts := zap.Options{
+	// 	Development: true,
+	// }
+	// ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 }
 
