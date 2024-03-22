@@ -1,13 +1,20 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
+	"fmt"
+	"io"
 	"os"
 	"path"
+	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	"github.com/davecgh/go-spew/spew"
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	"github.com/k3d-io/k3d/v5/pkg/runtimes"
 	"github.com/sirupsen/logrus"
@@ -17,6 +24,8 @@ import (
 	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/pthomison/k3auto/internal/k8s"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	kubectl "k8s.io/kubectl/pkg/cmd"
 )
@@ -42,6 +51,12 @@ func init() {
 	K3AutoCmd.PersistentFlags().StringVarP(&ClusterConfigFileFlag, "cluster-config", "c", "", "Override Cluster Config File")
 	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")
 	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster")
+
+	opts := zap.Options{
+		Development: true,
+	}
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
 }
 
 func k3AutoRun(cmd *cobra.Command, args []string) {
@@ -78,41 +93,9 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 		Namespace: "kube-system",
 	})
 
-	// deploymentFiles, err := defaults.DefaultDeployments.ReadDir("deployments")
-	// checkError(err)
-
-	// for _, v := range deploymentFiles {
-	// 	f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("deployments/%v", v.Name()))
-	// 	checkError(err)
-	// 	defer f.Close()
-
-	// 	fb, err := io.ReadAll(f)
-	// 	checkError(err)
-
-	// 	objs := bytes.Split(fb, []byte("---"))
-
-	// 	for _, obj := range objs {
-	// 		if len(obj) != 0 {
-	// 			obj, objType, err := k8s.ParseManifest(obj)
-	// 			checkError(err)
-
-	// 			_ = obj
-	// 			_ = objType
-	// 			spew.Dump(obj, objType)
-
-	// 			err = k8sC.Create(ctx, obj.(client.Object))
-	// 			checkError(err)
-
-	// 		}
-	// 	}
-
-	// }
-
 	// Generate Flux Controller Manifests
 	fluxManifests, err := flux.GenerateManifests()
 	checkError(err)
-
-	// spew.Dump(fluxManifests)
 
 	tmpDirLoc, err := os.MkdirTemp("", "k3auto-")
 	checkError(err)
@@ -121,29 +104,41 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 	fluxManifestsPath := path.Join(tmpDirLoc, "flux-manifests.yaml")
 	os.WriteFile(fluxManifestsPath, []byte(fluxManifests.Content), 0644)
 
-	// err = k8s.Apply(ctx, k8sC, []byte(fluxManifests.Content))
-	// checkError(err)
-
 	kubectlCmd := kubectl.NewDefaultKubectlCommand()
 	kubectlCmd.SetArgs([]string{"apply", "-f", fluxManifestsPath})
 	err = kubectlCmd.Execute()
 	checkError(err)
+	time.Sleep(1 * time.Second)
 
-	// genOps := install.MakeDefaultOptions()
-	// genOps.NetworkPolicy = false
-	// fManifest, err := install.Generate(genOps, "")
-	// checkError(err)
+	deploymentFiles, err := defaults.DefaultDeployments.ReadDir("deployments")
+	checkError(err)
 
-	// // Write Controller Manifests to tmp folder
-	// fileLoc, err := fManifest.WriteFile(os.TempDir())
-	// checkError(err)
-	// defer os.Remove(fileLoc)
+	for _, v := range deploymentFiles {
+		f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("deployments/%v", v.Name()))
+		checkError(err)
+		defer f.Close()
 
-	// Apply Controller Manifests
-	// TODO: Figure out a way to do this w/o exec & kubectl
-	// cmd := exec.Command("kubectl", "apply", "-f", fileLoc)
-	// err = cmd.Run()
-	// checkError(err)
+		fb, err := io.ReadAll(f)
+		checkError(err)
+
+		objs := bytes.Split(fb, []byte("---"))
+
+		for _, obj := range objs {
+			if len(obj) != 0 {
+				obj, objType, err := k8s.ParseManifest(obj)
+				checkError(err)
+
+				_ = obj
+				_ = objType
+				spew.Dump(obj, objType)
+
+				err = k8sC.Create(ctx, obj.(client.Object))
+				checkError(err)
+
+			}
+		}
+
+	}
 
 	// err = docker.BuildAndPushImage(ctx, dockerfileString)
 	// checkError(err)
