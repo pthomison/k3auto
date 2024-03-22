@@ -13,10 +13,9 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	// ctrl "sigs.k8s.io/controller-runtime"
-	// "sigs.k8s.io/controller-runtime/pkg/log/zap"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/davecgh/go-spew/spew"
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	"github.com/k3d-io/k3d/v5/pkg/runtimes"
 	"github.com/sirupsen/logrus"
@@ -52,10 +51,10 @@ func init() {
 	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")
 	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster")
 
-	// opts := zap.Options{
-	// 	Development: true,
-	// }
-	// ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	opts := zap.Options{
+		Development: true,
+	}
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 }
 
@@ -130,14 +129,12 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 
 				_ = obj
 				_ = objType
-				spew.Dump(obj, objType)
+				logrus.Info("Deploying: ", objType)
 
 				err = k8sC.Create(ctx, obj.(client.Object))
 				checkError(err)
-
 			}
 		}
-
 	}
 
 	// err = docker.BuildAndPushImage(ctx, dockerfileString)
