@@ -89,18 +89,18 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: k3auto
-          IMAGE_TAG: testing-${{ github.sha }}
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}
+          # REPOSITORY:
+          # IMAGE_TAG:
         with:
           context: .
           file: testing.Dockerfile
           platforms: linux/amd64
           labels: ${{ steps.meta.outputs.labels }}
           push: true
-          tags: $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          cache-from: type=registry,ref=$REGISTRY/$REPOSITORY:$IMAGE_TAG-buildcache
-          cache-to: type=registry,ref=$REGISTRY/$REPOSITORY:$IMAGE_TAG-buildcache,mode=max
+          tags: ${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}
+          cache-from: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}-buildcache
+          cache-to: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}-buildcache,mode=max
 
       - uses: actions/setup-go@v5
         with:
