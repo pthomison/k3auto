@@ -9,7 +9,6 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	defaults "github.com/pthomison/k3auto/default"
-	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 
@@ -44,23 +43,6 @@ func TestDecodeKustomization(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.IsTypef(t, obj, &kustomizev1.Kustomization{}, "Decoded Object Is Not appsv1.Deployment")
-}
-
-func TestDecodeCRD(t *testing.T) {
-
-	// spew.Dump(yb)
-
-	// cmd := kubectl.NewDefaultKubectlCommand()
-	// cmd.SetArgs([]string{"describe"})
-	// err = cmd.Execute()
-	// assert.Nil(t, err)
-
-	// var crd apiextensionsv1
-
-	// obj, _, err := deserialize(yb)
-	// assert.Nil(t, err)
-
-	// assert.IsTypef(t, obj, &kustomizev1.Kustomization{}, "Decoded Object Is Not appsv1.Deployment")
 }
 
 func TestDecodeK3dConfig(t *testing.T) {
@@ -131,9 +113,4 @@ func TestParseTypes(t *testing.T) {
 		}
 
 	}
-}
-
-func TestFluxManifests(t *testing.T) {
-	return
-	spew.Dump(flux.GenerateManifests())
 }

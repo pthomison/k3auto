@@ -16,6 +16,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
@@ -23,11 +26,10 @@ var (
 )
 
 func init() {
-	// ctrl.SetLogger(logzap.New(logzap.UseFlagOptions(&logzap.Options{
-	// 	Development: true, // a sane default
-	// 	ZapOpts:     []zap.Option{zap.AddCaller()},
-	// })))
-	// ctrl.SetLogger(logrus.New())
+	opts := zap.Options{
+		Development: true,
+	}
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 }
 
 func SetupEnvironment(ctx context.Context) (func(ctx context.Context) error, error) {
@@ -115,10 +117,5 @@ func TestEndToEnd(t *testing.T) {
 		Namespace: "flux-system",
 	})
 	assert.Nil(t, err)
-
-	// cmd := kubectl.NewDefaultKubectlCommand()
-	// cmd.SetArgs([]string{"apply", "-f", "../hack/test-crd.yaml"})
-	// err = cmd.Execute()
-	// assert.Nil(t, err)
 
 }
