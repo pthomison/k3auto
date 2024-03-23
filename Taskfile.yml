@@ -1,12 +1,17 @@
 version: "3"
 
 vars:
-  REPO: 362159410824.dkr.ecr.us-east-2.amazonaws.com/k3auto
   GIT_REV:
     sh: git -c safe.directory={{.ROOT_DIR}}  rev-parse --short HEAD
+  REGISTRY: 362159410824.dkr.ecr.us-east-2.amazonaws.com
+  REPOSITORY: "k3auto"
+  IMAGE_TAG: "testing-{{.GIT_REV}}"
+  IMAGE_REF: "{{.REGISTRY}}/{{.REPOSITORY}}:{{.IMAGE_TAG}}"
 
 tasks:
   rev: echo {{.GIT_REV}}
+
+  image-ref: echo {{.IMAGE_REF}}
 
   run:
     cmds:
@@ -29,7 +34,7 @@ tasks:
       - >
         docker build . 
         -f testing.Dockerfile 
-        -t {{.REPO}}:testing-{{.GIT_REV}}
+        -t {{.IMAGE_REF}}
 
   docker-test:
     cmds:
@@ -54,5 +59,5 @@ tasks:
         -v "/var/run/docker.sock:/var/run/docker.sock"
         -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}"
         -w "{{.ROOT_DIR}}"
-        {{.REPO}}:testing-{{.GIT_REV}}
+        {{.IMAGE_REF}}
         {{.DOCKER_CMD}}

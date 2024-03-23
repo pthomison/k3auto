@@ -94,30 +94,31 @@ jobs:
       #     docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
       #     docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: Set short git commit SHA
-        id: git-vars
-        run: |
-          calculatedSha=$(task rev)
-          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      # - name: Set short git commit SHA
+      #   id: git-vars
+      #   run: |
+      #     calculatedSha=$(task rev)
+      #     echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
 
-      - name: Set Image Vars
+      # - name: Set Image Ref
+      #   id: image-vars
+      #   env:
+      #     REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
+      #     REPOSITORY: "k3auto"
+      #     IMAGE_TAG: "testing-${{ env.COMMIT_SHORT_SHA }}"
+      #   run: |
+      #     # echo "REGISTRY=${REGISTRY}" >> $GITHUB_ENV
+      #     # echo "REPOSITORY=${REPOSITORY}" >> $GITHUB_ENV
+      #     # echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+      #     echo "IMAGE_REF=$(task image-ref)" >> $GITHUB_ENV
+
+      - name: Set Image Ref
         id: image-vars
-        env:
-          REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
-          REPOSITORY: "k3auto"
-          IMAGE_TAG: "testing-${{ env.COMMIT_SHORT_SHA }}"
         run: |
-          echo "REGISTRY=${REGISTRY}" >> $GITHUB_ENV
-          echo "REPOSITORY=${REPOSITORY}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
-          echo "IMAGE_REF=${REGISTRY}/${REPOSITORY}:${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "IMAGE_REF=$(task image-ref)" >> $GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v5
-        # env:
-        #   REGISTRY: ${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}
-        #   # REPOSITORY:
-        #   # IMAGE_TAG:
         with:
           context: .
           file: testing.Dockerfile
