@@ -8,16 +8,17 @@ import (
 	"io"
 	"os"
 	"path"
-	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
-	"github.com/k3d-io/k3d/v5/pkg/runtimes"
+	k3druntimes "github.com/k3d-io/k3d/v5/pkg/runtimes"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -25,20 +26,13 @@ import (
 	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/pthomison/k3auto/internal/k8s"
-
-	kubectl "k8s.io/kubectl/pkg/cmd"
 )
 
 var K3AutoCmd = &cobra.Command{
-	Use: "k3auto",
-	// Short: "Hugo is a very fast static site generator",
-	// Long: `A Fast and Flexible Static Site Generator built with
-	// 			  love by spf13 and friends in Go.
-	// 			  Complete documentation is available at https://gohugo.io/documentation/`,
-	Run: k3AutoRun,
+	Use:   "k3auto",
+	Short: "k3auto is a local kubernetes cluster orchestrator powered by k3d and flux",
+	Run:   k3AutoRun,
 }
-
-const ()
 
 var (
 	ClusterConfigFileFlag   string
@@ -55,32 +49,14 @@ func init() {
 		Development: true,
 	}
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
-
 }
 
-func k3AutoRun(cmd *cobra.Command, args []string) {
-
-	ctx := cmd.Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	rt := runtimes.Docker
-
-	var clusterConfig *k3dv1alpha5.SimpleConfig
-	var err error
-
-	if ClusterConfigFileFlag != "" {
-		clusterConfig, err = k3d.ParseConfigFile(ClusterConfigFileFlag, nil)
-		checkError(err)
-	} else {
-		clusterConfig, err = k3d.ParseConfigFile(defaults.K3dConfigLocation, &defaults.K3dConfig)
-		checkError(err)
-	}
-
+func initializeCluster(ctx context.Context, config *k3dv1alpha5.SimpleConfig, runtime k3druntimes.Runtime) (ctrlclient.Client, error) {
 	// Deploy the cluster defined in cluster.go
-	err = k3d.DeployCluster(ctx, clusterConfig, rt)
-	checkError(err)
+	err := k3d.DeployCluster(ctx, config, runtime)
+	if err != nil {
+		return nil, err
+	}
 
 	// Generate a k8s client from standard kubeconfig
 	k8sC, err := k8s.NewClient()
@@ -91,6 +67,43 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 		Name:      "coredns",
 		Namespace: "kube-system",
 	})
+
+	return k8sC, err
+}
+
+func parseConfigFile(configPath string) (*k3dv1alpha5.SimpleConfig, error) {
+	var clusterConfig *k3dv1alpha5.SimpleConfig
+	var err error
+
+	if configPath != "" {
+		clusterConfig, err = k3d.ParseConfigFile(configPath, nil)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		clusterConfig, err = k3d.ParseConfigFile(defaults.K3dConfigLocation, &defaults.K3dConfig)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return clusterConfig, nil
+}
+
+func k3AutoRun(cmd *cobra.Command, args []string) {
+
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	rt := k3druntimes.Docker
+
+	clusterConfig, err := parseConfigFile(ClusterConfigFileFlag)
+	checkError(err)
+
+	k8sC, err := initializeCluster(ctx, clusterConfig, rt)
+	checkError(err)
 
 	// Generate Flux Controller Manifests
 	fluxManifests, err := flux.GenerateManifests()
@@ -103,11 +116,8 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 	fluxManifestsPath := path.Join(tmpDirLoc, "flux-manifests.yaml")
 	os.WriteFile(fluxManifestsPath, []byte(fluxManifests.Content), 0644)
 
-	kubectlCmd := kubectl.NewDefaultKubectlCommand()
-	kubectlCmd.SetArgs([]string{"apply", "-f", fluxManifestsPath})
-	err = kubectlCmd.Execute()
+	err = k8s.KubectlApply(fluxManifestsPath)
 	checkError(err)
-	time.Sleep(1 * time.Second)
 
 	deploymentFiles, err := defaults.DefaultDeployments.ReadDir("deployments")
 	checkError(err)
