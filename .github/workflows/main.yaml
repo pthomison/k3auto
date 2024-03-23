@@ -87,13 +87,13 @@ jobs:
       #     docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Set short git commit SHA
-        id: vars
+        id: git-vars
         run: |
           calculatedSha=$(task rev)
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
 
       - name: Set Image Vars
-        id: vars
+        id: image-vars
         env:
           REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
           REPOSITORY: "k3auto"
