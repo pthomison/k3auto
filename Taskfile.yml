@@ -6,6 +6,8 @@ vars:
     sh: git -c safe.directory={{.ROOT_DIR}}  rev-parse --short HEAD
 
 tasks:
+  rev: echo ${GIT_REV}
+
   run:
     cmds:
       - go run .

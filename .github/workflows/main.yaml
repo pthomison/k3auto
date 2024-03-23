@@ -86,21 +86,39 @@ jobs:
       #     docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
       #     docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          calculatedSha=$(task rev)
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+
+      - name: Set Image Vars
+        id: vars
+        env:
+          REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
+          REPOSITORY: "k3auto"
+          IMAGE_TAG: "testing-${{ env.COMMIT_SHORT_SHA }}"
+        run: |
+          echo "REGISTRY=${REGISTRY}" >> $GITHUB_ENV
+          echo "REPOSITORY=${REPOSITORY}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "IMAGE_REF=${REGISTRY}/${REPOSITORY}:${IMAGE_TAG}" >> $GITHUB_ENV
+
       - name: Build and push
         uses: docker/build-push-action@v5
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}
-          # REPOSITORY:
-          # IMAGE_TAG:
+        # env:
+        #   REGISTRY: ${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}
+        #   # REPOSITORY:
+        #   # IMAGE_TAG:
         with:
           context: .
           file: testing.Dockerfile
           platforms: linux/amd64
           labels: ${{ steps.meta.outputs.labels }}
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}
-          cache-from: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}-buildcache
-          cache-to: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/k3auto:testing-${{ github.sha }}-buildcache,mode=max
+          tags: ${{ env.IMAGE_REF }}
+          cache-from: type=registry,ref=${{ env.IMAGE_REF }}-buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE_REF }}-buildcache,mode=max
 
       - uses: actions/setup-go@v5
         with:
