@@ -130,4 +130,4 @@ jobs:
           cache-to: type=registry,ref=${{ env.IMAGE_REF }}-buildcache,mode=max,image-manifest=true,oci-mediatypes=true
 
       - name: Task Test
-        run: "task docker-test"
+        run: "docker pull ${{ env.IMAGE_REF }} && task docker-test"
