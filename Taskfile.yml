@@ -10,7 +10,6 @@ vars:
 
 tasks:
   rev: echo {{.GIT_REV}}
-
   image-ref: echo {{.IMAGE_REF}}
 
   run:

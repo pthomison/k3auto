@@ -9,7 +9,6 @@ on:
 permissions:
   contents: write
   packages: write
-  # To report GitHub Actions status checks
   statuses: write
 
 concurrency:

@@ -23,10 +23,6 @@ brews:
       owner: pthomison
       name: homebrew-tools
 
-    # install: |
-    #   bin.install "exoskeleton"
-    #   ln_s bin/"exoskeleton", bin/"exo"
-
 nfpms:
   - maintainer: tbd
     formats:
