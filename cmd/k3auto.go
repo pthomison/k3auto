@@ -12,7 +12,6 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -170,7 +169,7 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 
 				logrus.Info("Deploying: ", objType)
 
-				err = k8sC.Create(ctx, obj.(client.Object))
+				err = k8sC.Create(ctx, obj.(ctrlclient.Object))
 				checkError(err)
 			}
 		}
@@ -197,7 +196,7 @@ func k3AutoRun(cmd *cobra.Command, args []string) {
 
 				logrus.Info("Deploying: ", objType)
 
-				err = k8sC.Create(ctx, obj.(client.Object))
+				err = k8sC.Create(ctx, obj.(ctrlclient.Object))
 				checkError(err)
 			}
 		}
