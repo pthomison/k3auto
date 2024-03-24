@@ -3,14 +3,21 @@
 An golang CLI tool used for rapidly deploying kubernetes evironments in a repeatable manner for local testing
 
 Powered By:
-- k3d
-- flux
+- [k3d](https://k3d.io)
+- [flux](https://fluxcd.io/)
+
 
 ### Installation
 ```
 brew tap pthomison/homebrew-tools
 brew install pthomison/tools/k3auto
 ```
+
+### Deployment Order Of Operations
+1. Deploy k3d Cluster
+2. Inject Flux Controllers
+3. Deploy Embedded Deployments
+4. Deploy Runtime Deployments
 
 ### Options
 ```
@@ -36,6 +43,7 @@ metrics-server
 
 To *only* deploy a the k3d cluster and flux controllers, use the `--minimal`/`-m` flag.
 
+
 The default k3d cluster config file is embeded in the binary, but can be found at `k3auto/default/k3d-config.yaml`. To use a different config file at runtime, use the `--cluster-config`/`-c` flag.
 
 ### Deploying Resources
@@ -43,7 +51,8 @@ The default k3d cluster config file is embeded in the binary, but can be found a
 To deploy your own desired resources at runtime, use the `--deployment-directory`/`-d` flag and supply yaml manifests within that directory. At present moment, k3auto will attempt to cast the objects to know types and then use the ctrl client to apply it into the cluster. There is a known limitation with deploying additional CRDs that is actively being worked on.
 
 
-### Options & Modifications
+### Modifications
 
+To embed your own deployment manifests, just fork this repository. Then add your manifests to the `default/deployments` directory and rebuild.
 
 
