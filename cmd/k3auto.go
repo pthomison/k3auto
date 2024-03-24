@@ -43,7 +43,7 @@ var (
 func init() {
 	K3AutoCmd.PersistentFlags().StringVarP(&ClusterConfigFileFlag, "cluster-config", "c", "", "Override Cluster Config File")
 	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")
-	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster")
+	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster & flux controllers")
 
 	opts := zap.Options{
 		Development: true,
@@ -90,61 +90,119 @@ func parseConfigFile(configPath string) (*k3dv1alpha5.SimpleConfig, error) {
 	return clusterConfig, nil
 }
 
-func k3AutoRun(cmd *cobra.Command, args []string) {
+func yamlReadAndSplit(reader io.Reader) ([][]byte, error) {
+	fb, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
 
+	// objs := bytes.Split(fb, []byte("---"))
+	var objs [][]byte
+
+	for _, obj := range bytes.Split(fb, []byte("---")) {
+		if len(obj) != 0 {
+			objs = append(objs, obj)
+		}
+	}
+
+	return objs, err
+}
+
+func injectFluxControllers() error {
+	tmpDirLoc, err := os.MkdirTemp("", "k3auto-flux-")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDirLoc)
+
+	// Generate Flux Controller Manifests
+	fluxManifests, err := flux.GenerateManifests()
+	if err != nil {
+		return err
+	}
+	fluxManifestsPath := path.Join(tmpDirLoc, "flux-manifests.yaml")
+	os.WriteFile(fluxManifestsPath, []byte(fluxManifests.Content), 0644)
+
+	err = k8s.KubectlApply(fluxManifestsPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func k3AutoRun(cmd *cobra.Command, args []string) {
 	ctx := cmd.Context()
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	rt := k3druntimes.Docker
-
 	clusterConfig, err := parseConfigFile(ClusterConfigFileFlag)
 	checkError(err)
+	logrus.Info("K3D Config File Loaded: ", ClusterConfigFileFlag)
 
-	k8sC, err := initializeCluster(ctx, clusterConfig, rt)
+	logrus.Info("Initializing Cluster")
+	k8sC, err := initializeCluster(ctx, clusterConfig, k3druntimes.Docker)
 	checkError(err)
+	logrus.Info("Cluster Initialized")
 
-	// Generate Flux Controller Manifests
-	fluxManifests, err := flux.GenerateManifests()
+	logrus.Info("Injecting Flux Controllers")
+	err = injectFluxControllers()
 	checkError(err)
+	logrus.Info("Flux Controllers Injected")
 
-	tmpDirLoc, err := os.MkdirTemp("", "k3auto-")
-	checkError(err)
-	defer os.RemoveAll(tmpDirLoc)
+	if !MinimalFlag {
 
-	fluxManifestsPath := path.Join(tmpDirLoc, "flux-manifests.yaml")
-	os.WriteFile(fluxManifestsPath, []byte(fluxManifests.Content), 0644)
-
-	err = k8s.KubectlApply(fluxManifestsPath)
-	checkError(err)
-
-	deploymentFiles, err := defaults.DefaultDeployments.ReadDir("deployments")
-	checkError(err)
-
-	for _, v := range deploymentFiles {
-		f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("deployments/%v", v.Name()))
+		logrus.Info("Injecting Default Deployments")
+		deploymentFiles, err := defaults.DefaultDeployments.ReadDir(defaults.DefaultDeploymentsFolder)
 		checkError(err)
-		defer f.Close()
+		for _, v := range deploymentFiles {
+			f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("%v/%v", defaults.DefaultDeploymentsFolder, v.Name()))
+			checkError(err)
+			defer f.Close()
 
-		fb, err := io.ReadAll(f)
-		checkError(err)
+			fileObjects, err := yamlReadAndSplit(f)
+			checkError(err)
 
-		objs := bytes.Split(fb, []byte("---"))
-
-		for _, obj := range objs {
-			if len(obj) != 0 {
+			for _, obj := range fileObjects {
 				obj, objType, err := k8s.ParseManifest(obj)
 				checkError(err)
 
-				_ = obj
-				_ = objType
 				logrus.Info("Deploying: ", objType)
 
 				err = k8sC.Create(ctx, obj.(client.Object))
 				checkError(err)
 			}
 		}
+		logrus.Info("Default Deployments Injected")
+
+	}
+
+	if DeploymentDirectoryFlag != "" {
+
+		logrus.Info("Injecting Directory Deployments")
+		deploymentFiles, err := os.ReadDir(DeploymentDirectoryFlag)
+		checkError(err)
+		for _, v := range deploymentFiles {
+			f, err := os.Open(fmt.Sprintf("%v/%v", DeploymentDirectoryFlag, v.Name()))
+			checkError(err)
+			defer f.Close()
+
+			fileObjects, err := yamlReadAndSplit(f)
+			checkError(err)
+
+			for _, obj := range fileObjects {
+				obj, objType, err := k8s.ParseManifest(obj)
+				checkError(err)
+
+				logrus.Info("Deploying: ", objType)
+
+				err = k8sC.Create(ctx, obj.(client.Object))
+				checkError(err)
+			}
+		}
+		logrus.Info("Directory Deployments Injected")
+
 	}
 
 	// err = docker.BuildAndPushImage(ctx, dockerfileString)

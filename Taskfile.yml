@@ -41,6 +41,12 @@ tasks:
         vars:
           DOCKER_CMD: task test
 
+  docker-no-build-test:
+    cmds:
+      - task: docker-no-build
+        vars:
+          DOCKER_CMD: task test
+
   docker-shell:
     cmds:
       - task: docker
@@ -51,6 +57,10 @@ tasks:
   docker:
     cmds:
       - task: docker-test-image
+      - task: docker-no-build
+
+  docker-no-build:
+    cmds:
       - >
         docker run --rm -t
         {{.DOCKER_RUN_EXTRA_FLAGS}}
