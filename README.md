@@ -25,13 +25,22 @@ $ k3auto --help
 k3auto is a local kubernetes cluster orchestrator powered by k3d and flux
 
 Usage:
-  k3auto [flags]
+  k3auto [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  create      Create a new K3D Cluster and inject flux controllers & deployments
+  delete      Delete an existing cluster
+  help        Help about any command
 
 Flags:
   -c, --cluster-config string         Override Cluster Config File
   -d, --deployment-directory string   Deployment Directory
   -h, --help                          help for k3auto
   -m, --minimal                       Only deploy the k3d cluster & flux controllers
+
+Use "k3auto [command] --help" for more information about a command.
+
 ```
 
 ###  Cluster Deployment
