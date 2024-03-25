@@ -71,3 +71,6 @@ jobs:
 
       - name: Task Test
         run: "docker pull ${{ env.IMAGE_REF }} && task docker-no-build-test"
+
+      # - name: Task Test
+      #   run: "task docker-test"
