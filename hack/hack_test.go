@@ -2,12 +2,14 @@ package hack
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/pthomison/k3auto/cmd"
 	defaults "github.com/pthomison/k3auto/default"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
@@ -113,4 +115,13 @@ func TestParseTypes(t *testing.T) {
 		}
 
 	}
+}
+
+func TestSubCommands(t *testing.T) {
+	return
+	ctx := context.TODO()
+	cmd.K3AutoCmd.SetArgs([]string{"create"})
+	cmd.K3AutoCmd.ExecuteContext(ctx)
+
+	// cmd.K3AutoCmd.Ex
 }

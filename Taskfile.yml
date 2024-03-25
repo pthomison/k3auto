@@ -58,6 +58,8 @@ tasks:
     cmds:
       - task: docker-test-image
       - task: docker-no-build
+        vars:
+          DOCKER_CMD: "{{.DOCKER_CMD}}"
 
   docker-no-build:
     cmds:
