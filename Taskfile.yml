@@ -11,6 +11,8 @@ vars:
 tasks:
   rev: echo {{.GIT_REV}}
   image-ref: echo {{.IMAGE_REF}}
+  image-registry: echo {{.REGISTRY}}
+  image-repository: echo {{.REPOSITORY}}
 
   run:
     cmds:
