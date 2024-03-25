@@ -55,7 +55,7 @@ jobs:
         run: |
           echo "IMAGE_REF=$(task image-ref)" >> $GITHUB_ENV
           echo "REGISTRY=$(task image-registry)" >> $GITHUB_ENV
-          echo "REPOSITORY=$(task image-registry)" >> $GITHUB_ENV
+          echo "REPOSITORY=$(task image-repository)" >> $GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v5
