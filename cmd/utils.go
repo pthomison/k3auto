@@ -52,3 +52,27 @@ func yamlReadAndSplit(reader io.Reader) ([][]byte, error) {
 
 	return objs, err
 }
+
+// func k3autoDeploy() {
+// 	deploymentFiles, err := defaults.DefaultDeployments.ReadDir(defaults.DefaultDeploymentsFolder)
+// 	checkError(err)
+// 	for _, v := range deploymentFiles {
+// 		f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("%v/%v", defaults.DefaultDeploymentsFolder, v.Name()))
+// 		checkError(err)
+// 		defer f.Close()
+
+// 		fileObjects, err := yamlReadAndSplit(f)
+// 		checkError(err)
+
+// 		for _, obj := range fileObjects {
+// 			obj, objType, err := k8s.ParseManifest(obj)
+// 			checkError(err)
+
+// 			logrus.Info("Deploying: ", objType)
+
+// 			err = k8sC.Create(ctx, obj.(ctrlclient.Object))
+// 			checkError(err)
+// 		}
+// 	}
+// 	logrus.Info("Default Deployments Injected")
+// }
