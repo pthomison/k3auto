@@ -9,6 +9,8 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apimachinerytypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	sourcev1beta2 "github.com/fluxcd/source-controller/api/v1beta2"
 )
 
 func WaitForKustomization(ctx context.Context, k8s client.Client, desiredDep v1.ObjectMeta) error {
@@ -31,4 +33,44 @@ func WaitForKustomization(ctx context.Context, k8s client.Client, desiredDep v1.
 		}
 		time.Sleep(time.Second * 1)
 	}
+}
+
+func NewOCIKustomization(name string) (sourcev1beta2.OCIRepository, kustomizev1.Kustomization) {
+	ocirepo := sourcev1beta2.OCIRepository{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      name,
+			Namespace: "flux-system",
+		},
+		Spec: sourcev1beta2.OCIRepositorySpec{
+			Interval: v1.Duration{
+				Duration: time.Minute * 5,
+			},
+			URL: "oci://172.17.0.4:5000/k3auto-fluxdir",
+			Reference: &sourcev1beta2.OCIRepositoryRef{
+				Tag: "latest",
+			},
+			Insecure: true,
+		},
+	}
+
+	kustomizationOCI := kustomizev1.Kustomization{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      name,
+			Namespace: "flux-system",
+		},
+		Spec: kustomizev1.KustomizationSpec{
+			Interval: v1.Duration{
+				Duration: time.Minute * 10,
+			},
+			Path:  "/",
+			Prune: true,
+			SourceRef: kustomizev1.CrossNamespaceSourceReference{
+				Kind:      "OCIRepository",
+				Name:      name,
+				Namespace: "flux-system",
+			},
+		},
+	}
+
+	return ocirepo, kustomizationOCI
 }

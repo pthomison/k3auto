@@ -11,7 +11,6 @@ require (
 	github.com/fluxcd/kustomize-controller/api v1.2.2
 	github.com/fluxcd/source-controller/api v1.2.4
 	github.com/k3d-io/k3d/v5 v5.6.0
-	github.com/moby/patternmatcher v0.5.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
 	github.com/spf13/cobra v1.8.0
@@ -124,6 +123,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+	github.com/moby/patternmatcher v0.5.0 // indirect
 	github.com/moby/spdystream v0.2.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.1 // indirect
 	github.com/moby/sys/sequential v0.5.0 // indirect
