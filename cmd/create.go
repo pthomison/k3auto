@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/pthomison/k3auto/internal/k8s"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -87,7 +87,7 @@ func k3AutoCreate(cmd *cobra.Command, args []string) {
 	logrus.Info("K3D Config File Loaded: ", ClusterConfigFileFlag)
 
 	logrus.Info("Initializing Cluster")
-	k8sC, err := initializeCluster(ctx, clusterConfig, k3druntimes.Docker)
+	_, err = initializeCluster(ctx, clusterConfig, k3druntimes.Docker)
 	checkError(err)
 	logrus.Info("Cluster Initialized")
 
@@ -99,26 +99,8 @@ func k3AutoCreate(cmd *cobra.Command, args []string) {
 	if !MinimalFlag {
 
 		logrus.Info("Injecting Default Deployments")
-		deploymentFiles, err := defaults.DefaultDeployments.ReadDir(defaults.DefaultDeploymentsFolder)
+		err = k3autoDeploy(ctx, "default", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
 		checkError(err)
-		for _, v := range deploymentFiles {
-			f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("%v/%v", defaults.DefaultDeploymentsFolder, v.Name()))
-			checkError(err)
-			defer f.Close()
-
-			fileObjects, err := yamlReadAndSplit(f)
-			checkError(err)
-
-			for _, obj := range fileObjects {
-				obj, objType, err := k8s.ParseManifest(obj)
-				checkError(err)
-
-				logrus.Info("Deploying: ", objType)
-
-				err = k8sC.Create(ctx, obj.(ctrlclient.Object))
-				checkError(err)
-			}
-		}
 		logrus.Info("Default Deployments Injected")
 
 	}
@@ -126,26 +108,29 @@ func k3AutoCreate(cmd *cobra.Command, args []string) {
 	if DeploymentDirectoryFlag != "" {
 
 		logrus.Info("Injecting Directory Deployments")
-		deploymentFiles, err := os.ReadDir(DeploymentDirectoryFlag)
+		err = k3autoDeploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
 		checkError(err)
-		for _, v := range deploymentFiles {
-			f, err := os.Open(fmt.Sprintf("%v/%v", DeploymentDirectoryFlag, v.Name()))
-			checkError(err)
-			defer f.Close()
 
-			fileObjects, err := yamlReadAndSplit(f)
-			checkError(err)
+		// deploymentFiles, err := os.ReadDir(DeploymentDirectoryFlag)
+		// checkError(err)
+		// for _, v := range deploymentFiles {
+		// 	f, err := os.Open(fmt.Sprintf("%v/%v", DeploymentDirectoryFlag, v.Name()))
+		// 	checkError(err)
+		// 	defer f.Close()
 
-			for _, obj := range fileObjects {
-				obj, objType, err := k8s.ParseManifest(obj)
-				checkError(err)
+		// 	fileObjects, err := yamlReadAndSplit(f)
+		// 	checkError(err)
 
-				logrus.Info("Deploying: ", objType)
+		// 	for _, obj := range fileObjects {
+		// 		obj, objType, err := k8s.ParseManifest(obj)
+		// 		checkError(err)
 
-				err = k8sC.Create(ctx, obj.(ctrlclient.Object))
-				checkError(err)
-			}
-		}
+		// 		logrus.Info("Deploying: ", objType)
+
+		// 		err = k8sC.Create(ctx, obj.(ctrlclient.Object))
+		// 		checkError(err)
+		// 	}
+		// }
 		logrus.Info("Directory Deployments Injected")
 
 	}

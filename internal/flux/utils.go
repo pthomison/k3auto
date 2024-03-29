@@ -2,6 +2,7 @@ package flux
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
@@ -35,7 +36,8 @@ func WaitForKustomization(ctx context.Context, k8s client.Client, desiredDep v1.
 	}
 }
 
-func NewOCIKustomization(name string) (sourcev1beta2.OCIRepository, kustomizev1.Kustomization) {
+func NewOCIKustomization(name string, image string, tag string) (sourcev1beta2.OCIRepository, kustomizev1.Kustomization) {
+
 	ocirepo := sourcev1beta2.OCIRepository{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
@@ -45,9 +47,9 @@ func NewOCIKustomization(name string) (sourcev1beta2.OCIRepository, kustomizev1.
 			Interval: v1.Duration{
 				Duration: time.Minute * 5,
 			},
-			URL: "oci://172.17.0.4:5000/k3auto-fluxdir",
+			URL: fmt.Sprintf("oci://k3auto-registry.localhost:5000/%v", image),
 			Reference: &sourcev1beta2.OCIRepositoryRef{
-				Tag: "latest",
+				Tag: tag,
 			},
 			Insecure: true,
 		},
