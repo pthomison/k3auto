@@ -73,7 +73,7 @@ func SetupEnvironment(ctx context.Context) (func(ctx context.Context) error, err
 func TestEndToEnd(t *testing.T) {
 	logrus.Info("Starting End to End Test")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(180*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(300*time.Second))
 	defer cancel()
 	go func() {
 		select {
@@ -118,6 +118,18 @@ func TestEndToEnd(t *testing.T) {
 	err = k8s.WaitForDeployment(ctx, k8sC, metav1.ObjectMeta{
 		Name:      "kustomize-controller",
 		Namespace: "flux-system",
+	})
+	assert.Nil(t, err)
+
+	err = k8s.WaitForDeployment(ctx, k8sC, metav1.ObjectMeta{
+		Name:      "metrics-server",
+		Namespace: "metrics-server",
+	})
+	assert.Nil(t, err)
+
+	err = k8s.WaitForDeployment(ctx, k8sC, metav1.ObjectMeta{
+		Name:      "kube-state-metrics",
+		Namespace: "kube-state-metrics",
 	})
 	assert.Nil(t, err)
 

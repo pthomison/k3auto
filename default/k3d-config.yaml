@@ -4,18 +4,25 @@ metadata:
   name: k3auto
 servers: 1
 image: docker.io/rancher/k3s:v1.29.1-k3s1
-network: bridge
+# network: bridge
 kubeAPI:
+  # host: host.docker.internal
   hostPort: "6443"
+
+ports:
+  - port: 8080:80 # same as `--port '8080:80@loadbalancer'`
+    nodeFilters:
+      - loadbalancer
+
 options:
   k3d:
     wait: true
     timeout: 3m0s
-    disableLoadbalancer: true
+    # disableLoadbalancer: true
 
   k3s:
     extraArgs:
-      - arg: --disable=servicelb,traefik,metrics-server
+      - arg: --disable=traefik,metrics-server
         nodeFilters:
           - server:*
       - arg: --disable-network-policy
@@ -30,5 +37,5 @@ options:
 
 registries:
   create:
-    name: k3auto-registry
+    name: k3auto-registry.localhost
     hostPort: "8888"
