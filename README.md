@@ -3,8 +3,10 @@
 An golang CLI tool used for rapidly deploying kubernetes evironments in a repeatable manner for local testing
 
 Powered By:
-- [k3d](https://k3d.io)
 - [flux](https://fluxcd.io/)
+- [k3d](https://k3d.io)
+- [k3s](https://k3s.io/)
+- [k8s](https://kubernetes.io/)
 
 
 ### Installation
@@ -48,6 +50,7 @@ Use "k3auto [command] --help" for more information about a command.
 By default, k3auto will deploy a single node k3d cluster and will inject the following resources
 ```
 metrics-server
+kube-state-metrics
 ```
 
 To *only* deploy a the k3d cluster and flux controllers, use the `--minimal`/`-m` flag.
