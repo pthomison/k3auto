@@ -3,7 +3,9 @@ package cmd
 import (
 	"context"
 
+	defaults "github.com/pthomison/k3auto/default"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -19,10 +21,28 @@ func k3AutoUpdate(cmd *cobra.Command, args []string) {
 		ctx = context.Background()
 	}
 
-	clusterConfig, err := parseConfigFile(ClusterConfigFileFlag)
-	checkError(err)
-	logrus.Info("K3D Config File Loaded: ", ClusterConfigFileFlag)
+	var err error
 
-	_ = clusterConfig
-	logrus.Info("Implementation Pending")
+	// clusterConfig, err := parseConfigFile(ClusterConfigFileFlag)
+	// checkError(err)
+	// logrus.Info("K3D Config File Loaded: ", ClusterConfigFileFlag)
+
+	if !MinimalFlag {
+
+		logrus.Info("Injecting Default Deployments")
+		err = k3autoDeploy(ctx, "default", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
+		checkError(err)
+		logrus.Info("Default Deployments Injected")
+
+	}
+
+	if DeploymentDirectoryFlag != "" {
+
+		logrus.Info("Injecting Directory Deployments")
+		err = k3autoDeploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
+		checkError(err)
+
+		logrus.Info("Directory Deployments Injected")
+
+	}
 }

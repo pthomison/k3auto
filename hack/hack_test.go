@@ -1,127 +1,75 @@
 package hack
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
+	"net"
 	"os"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/pthomison/k3auto/cmd"
-	defaults "github.com/pthomison/k3auto/default"
+	"github.com/pthomison/k3auto/internal/docker"
+	"github.com/pthomison/k3auto/internal/flux"
+	"github.com/pthomison/k3auto/internal/k8s"
 	"github.com/spf13/afero"
-	"github.com/spf13/viper"
-
-	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
-	appsv1 "k8s.io/api/apps/v1"
-
-	k3dconfig "github.com/k3d-io/k3d/v5/pkg/config"
-
 	"github.com/stretchr/testify/assert"
 )
 
 const (
-	deploymentLocation    = "test-deployment.yaml"
-	kustomizationLocation = "test-kustomization.yaml"
-	k3dConfigLocation     = "test-k3dconfig.yaml"
-	crdConfigLocation     = "test-crd.yaml"
+	dockerfile = "k3auto.Dockerfile"
+	imageRef   = "k3auto-hack:latest"
+	contextDir = ".."
 )
 
-func TestDecodeDeployment(t *testing.T) {
-	yb, err := os.ReadFile(deploymentLocation)
-	assert.Nil(t, err)
-	obj, _, err := deserialize(yb)
-	assert.Nil(t, err)
-
-	assert.IsTypef(t, obj, &appsv1.Deployment{}, "Decoded Object Is Not appsv1.Deployment")
-}
-
-func TestDecodeKustomization(t *testing.T) {
-	yb, err := os.ReadFile(kustomizationLocation)
-	assert.Nil(t, err)
-	obj, _, err := deserialize(yb)
-	assert.Nil(t, err)
-
-	assert.IsTypef(t, obj, &kustomizev1.Kustomization{}, "Decoded Object Is Not appsv1.Deployment")
-}
-
-func TestDecodeK3dConfig(t *testing.T) {
-	config := viper.New()
-	config.SetConfigFile(k3dConfigLocation)
-
-	if err := config.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			t.Error(err)
-		}
-		t.Error(err)
-	}
-
-	cfg, err := k3dconfig.FromViper(config)
-	if err != nil {
-		t.Error(err)
-	}
-
-	assert.NotNil(t, cfg)
-}
-
-func TestEmbededK3dConfig(t *testing.T) {
-	config := viper.New()
-	config.SetFs(afero.FromIOFS{FS: defaults.K3dConfig})
-	config.SetConfigFile(defaults.K3dConfigLocation)
-
-	if err := config.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			t.Error(err)
-		}
-		t.Error(err)
-	}
-
-	cfg, err := k3dconfig.FromViper(config)
-	if err != nil {
-		t.Error(err)
-	}
-
-	assert.NotNil(t, cfg)
-}
-
-func TestParseTypes(t *testing.T) {
-	spew.Dump()
-
-	files, err := defaults.DefaultDeployments.ReadDir("deployments")
-	assert.Nil(t, err)
-
-	for _, v := range files {
-		spew.Dump(v)
-		f, err := defaults.DefaultDeployments.Open(fmt.Sprintf("deployments/%v", v.Name()))
-		assert.Nil(t, err)
-		defer f.Close()
-
-		fb, err := io.ReadAll(f)
-		assert.Nil(t, err)
-
-		objs := bytes.Split(fb, []byte("---"))
-
-		for _, obj := range objs {
-			if len(obj) != 0 {
-				obj, objType, err := deserialize(obj)
-				assert.Nil(t, err)
-
-				_ = obj
-				_ = objType
-				// spew.Dump(obj, objType)
-			}
-		}
-
-	}
-}
-
-func TestSubCommands(t *testing.T) {
+func TestImageLookup(t *testing.T) {
 	return
 	ctx := context.TODO()
-	cmd.K3AutoCmd.SetArgs([]string{"create"})
-	cmd.K3AutoCmd.ExecuteContext(ctx)
 
-	// cmd.K3AutoCmd.Ex
+	apiClient, err := docker.NewClient()
+	assert.Nil(t, err)
+	defer apiClient.Close()
+
+	err = os.WriteFile(fmt.Sprintf("%v/%v", contextDir, dockerfile), []byte(docker.DumpDockerfile), 0644)
+	assert.Nil(t, err)
+	defer os.Remove(fmt.Sprintf("%v/%v", contextDir, dockerfile))
+
+	err = docker.BuildImage(ctx, contextDir, dockerfile, []string{imageRef}, afero.NewOsFs())
+	spew.Dump(err)
+	assert.Nil(t, err)
+
+	err = docker.PushImage(ctx, imageRef, "127.0.0.1:8888")
+	assert.Nil(t, err)
+}
+
+func TestKubectlApply(t *testing.T) {
+	return
+	ctx := context.TODO()
+
+	fluxManifests, err := flux.GenerateManifests()
+	assert.Nil(t, err)
+
+	k8sC, err := k8s.NewClient()
+	assert.Nil(t, err)
+
+	k8s.CreateManifests(ctx, k8sC, fluxManifests.Content)
+
+}
+
+func TestIpLookup(t *testing.T) {
+	// get list of available addresses
+	addr, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, addr := range addr {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			// check if IPv4 or IPv6 is not nil
+			if ipnet.IP.To4() != nil {
+				// print available addresses
+				fmt.Println(ipnet.IP.String())
+			}
+		}
+	}
 }

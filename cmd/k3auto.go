@@ -24,4 +24,5 @@ func init() {
 
 	K3AutoCmd.AddCommand(CreateCmd)
 	K3AutoCmd.AddCommand(DeleteCmd)
+	// K3AutoCmd.AddCommand(UpdateCmd)
 }
