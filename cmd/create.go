@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"context"
-	"os"
-	"path"
 
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	k3druntimes "github.com/k3d-io/k3d/v5/pkg/runtimes"
@@ -53,22 +51,18 @@ func initializeCluster(ctx context.Context, config *k3dv1alpha5.SimpleConfig, ru
 	return k8sC, err
 }
 
-func injectFluxControllers() error {
-	tmpDirLoc, err := os.MkdirTemp("", "k3auto-flux-")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tmpDirLoc)
-
-	// Generate Flux Controller Manifests
+func injectFluxControllers(ctx context.Context) error {
 	fluxManifests, err := flux.GenerateManifests()
 	if err != nil {
 		return err
 	}
-	fluxManifestsPath := path.Join(tmpDirLoc, "flux-manifests.yaml")
-	os.WriteFile(fluxManifestsPath, []byte(fluxManifests.Content), 0644)
 
-	err = k8s.KubectlApply(fluxManifestsPath)
+	k8sC, err := k8s.NewClient()
+	if err != nil {
+		return err
+	}
+
+	err = k8s.CreateManifests(ctx, k8sC, fluxManifests.Content)
 	if err != nil {
 		return err
 	}
@@ -92,7 +86,7 @@ func k3AutoCreate(cmd *cobra.Command, args []string) {
 	logrus.Info("Cluster Initialized")
 
 	logrus.Info("Injecting Flux Controllers")
-	err = injectFluxControllers()
+	err = injectFluxControllers(ctx)
 	checkError(err)
 	logrus.Info("Flux Controllers Injected")
 
@@ -111,39 +105,7 @@ func k3AutoCreate(cmd *cobra.Command, args []string) {
 		err = k3autoDeploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
 		checkError(err)
 
-		// deploymentFiles, err := os.ReadDir(DeploymentDirectoryFlag)
-		// checkError(err)
-		// for _, v := range deploymentFiles {
-		// 	f, err := os.Open(fmt.Sprintf("%v/%v", DeploymentDirectoryFlag, v.Name()))
-		// 	checkError(err)
-		// 	defer f.Close()
-
-		// 	fileObjects, err := yamlReadAndSplit(f)
-		// 	checkError(err)
-
-		// 	for _, obj := range fileObjects {
-		// 		obj, objType, err := k8s.ParseManifest(obj)
-		// 		checkError(err)
-
-		// 		logrus.Info("Deploying: ", objType)
-
-		// 		err = k8sC.Create(ctx, obj.(ctrlclient.Object))
-		// 		checkError(err)
-		// 	}
-		// }
 		logrus.Info("Directory Deployments Injected")
-
 	}
 
-	// err = docker.BuildAndPushImage(ctx, dockerfileString)
-	// checkError(err)
-
-	// // Create the Bootstrap Flux Resources
-	// err = k8sC.Create(ctx, &ocirepo)
-	// checkError(err)
-	// err = k8sC.Create(ctx, &kustomizationOCI)
-	// checkError(err)
-
-	// // Wait for the flux
-	// flux.WaitForKustomization(ctx, k8sC, kustomizationOCI.ObjectMeta)
 }

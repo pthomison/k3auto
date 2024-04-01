@@ -3,11 +3,14 @@ package hack
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/pthomison/k3auto/internal/docker"
+	"github.com/pthomison/k3auto/internal/flux"
+	"github.com/pthomison/k3auto/internal/k8s"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,55 +20,6 @@ const (
 	imageRef   = "k3auto-hack:latest"
 	contextDir = ".."
 )
-
-// func TestInterfaces(t *testing.T) {
-// 	ifaces, err := net.Interfaces()
-// 	if err != nil {
-// 		fmt.Print(fmt.Errorf("localAddresses: %+v\n", err.Error()))
-// 		return
-// 	}
-
-// 	for _, i := range ifaces {
-// 		addrs, err := i.Addrs()
-
-// 		for _, a := range addrs {
-// 			i, n, err := net.ParseCIDR(a.String())
-// 			assert.Nil(t, err)
-
-// 			if i.To4() != nil {
-// 				spew.Dump(i, n)
-// 			}
-
-// 		}
-
-// 		if i.Name == "en0" {
-// 			fmt.Println(i.Name)
-// 			// spew.Dump(addrs)
-
-// 			for _, a := range addrs {
-// 				i, n, err := net.ParseCIDR(a.String())
-// 				assert.Nil(t, err)
-
-// 				if i.To4() != nil {
-// 					spew.Dump(i, n)
-// 				}
-
-// 			}
-// 		}
-
-// 		if err != nil {
-// 			fmt.Print(fmt.Errorf("localAddresses: %+v\n", err.Error()))
-// 			continue
-// 		}
-// 		for _, a := range addrs {
-// 			switch v := a.(type) {
-// 			case *net.IPAddr:
-// 				fmt.Printf("%v : %s (%s)\n", i.Name, v, v.IP.DefaultMask())
-// 			}
-
-// 		}
-// 	}
-// }
 
 func TestImageLookup(t *testing.T) {
 	return
@@ -85,21 +39,37 @@ func TestImageLookup(t *testing.T) {
 
 	err = docker.PushImage(ctx, imageRef, "127.0.0.1:8888")
 	assert.Nil(t, err)
+}
 
-	// image, err := docker.GetImageByName(ctx, imageRef)
-	// assert.Nil(t, err)
+func TestKubectlApply(t *testing.T) {
+	return
+	ctx := context.TODO()
 
-	// spew.Dump(image)
+	fluxManifests, err := flux.GenerateManifests()
+	assert.Nil(t, err)
 
-	// hashRef := strings.ReplaceAll(image.RepoDigests[0], "@sha256:", ":")
+	k8sC, err := k8s.NewClient()
+	assert.Nil(t, err)
 
-	// err = docker.TagImage(ctx, image.RepoDigests[0], hashRef)
-	// assert.Nil(t, err)
+	k8s.CreateManifests(ctx, k8sC, fluxManifests.Content)
 
-	// // spew.Dump(image)
-	// // spew.Dump(imageRef)
+}
 
-	// err = docker.PushImage(ctx, hashRef, "127.0.0.1:8888")
-	// assert.Nil(t, err)
+func TestIpLookup(t *testing.T) {
+	// get list of available addresses
+	addr, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
+	for _, addr := range addr {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			// check if IPv4 or IPv6 is not nil
+			if ipnet.IP.To4() != nil {
+				// print available addresses
+				fmt.Println(ipnet.IP.String())
+			}
+		}
+	}
 }

@@ -1,10 +1,12 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
+	"errors"
 	"fmt"
-	"io"
+	"net"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	defaults "github.com/pthomison/k3auto/default"
@@ -42,32 +44,46 @@ func parseConfigFile(configPath string) (*k3dv1alpha5.SimpleConfig, error) {
 	return clusterConfig, nil
 }
 
-func yamlReadAndSplit(reader io.Reader) ([][]byte, error) {
-	fb, err := io.ReadAll(reader)
+func lookupIpv4() (string, error) {
+	// get list of available addresses
+	addr, err := net.InterfaceAddrs()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	var objs [][]byte
-
-	for _, obj := range bytes.Split(fb, []byte("---")) {
-		if len(obj) != 0 {
-			objs = append(objs, obj)
+	for _, addr := range addr {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			// check if IPv4 or IPv6 is not nil
+			if ipnet.IP.To4() != nil {
+				// print available addresses
+				return ipnet.IP.String(), nil
+			}
 		}
 	}
-
-	return objs, err
+	return "", errors.New("no ipv4 network detected")
 }
 
 func k3autoDeploy(ctx context.Context, name string, directory string, filesystem afero.Fs) error {
 	imageRef := fmt.Sprintf("%v:%v", name, name)
 
-	err := docker.BuildImage(ctx, directory, docker.DumpDockerfile, []string{imageRef}, filesystem)
+	machineIP, err := lookupIpv4()
 	if err != nil {
 		return err
 	}
 
-	err = docker.PushImage(ctx, imageRef, "127.0.0.1:8888")
+	tag := name
+	repository := fmt.Sprintf("%v:8888", machineIP)
+	image := name
+	namespace := "kube-system"
+
+	logrus.Infof("%v Deployments Injecting", name)
+
+	err = docker.BuildImage(ctx, directory, docker.DumpDockerfile, []string{imageRef}, filesystem)
+	if err != nil {
+		return err
+	}
+
+	err = docker.PushImage(ctx, imageRef, repository)
 	if err != nil {
 		return err
 	}
@@ -77,18 +93,21 @@ func k3autoDeploy(ctx context.Context, name string, directory string, filesystem
 		return err
 	}
 
-	repo, kustomization := flux.NewOCIKustomization(name, name, name)
+	repo := flux.NewOCIRepoObject(name, namespace, repository, image, tag)
+	kustomization := flux.NewOCIKustomizationObject(name, namespace)
 
-	err = k8sC.Create(ctx, &repo)
+	err = k8s.CreateObjects(ctx, k8sC, []runtime.Object{&repo, &kustomization})
 	if err != nil {
 		return err
 	}
 
-	err = k8sC.Create(ctx, &kustomization)
+	logrus.Infof("%v Deployments Injected", name)
+
+	logrus.Infof("Waiting For %v Kustomization", name)
+	err = flux.WaitForKustomization(ctx, k8sC, kustomization.ObjectMeta)
 	if err != nil {
 		return err
 	}
 
-	logrus.Info("Default Deployments Injected")
 	return nil
 }

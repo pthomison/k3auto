@@ -36,29 +36,30 @@ func WaitForKustomization(ctx context.Context, k8s client.Client, desiredDep v1.
 	}
 }
 
-func NewOCIKustomization(name string, image string, tag string) (sourcev1beta2.OCIRepository, kustomizev1.Kustomization) {
-
-	ocirepo := sourcev1beta2.OCIRepository{
+func NewOCIRepoObject(name string, namespace string, repository string, image string, tag string) sourcev1beta2.OCIRepository {
+	return sourcev1beta2.OCIRepository{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
-			Namespace: "flux-system",
+			Namespace: namespace,
 		},
 		Spec: sourcev1beta2.OCIRepositorySpec{
 			Interval: v1.Duration{
 				Duration: time.Minute * 5,
 			},
-			URL: fmt.Sprintf("oci://k3auto-registry.localhost:5000/%v", image),
+			URL: fmt.Sprintf("oci://%v/%v", repository, image),
 			Reference: &sourcev1beta2.OCIRepositoryRef{
 				Tag: tag,
 			},
 			Insecure: true,
 		},
 	}
+}
 
-	kustomizationOCI := kustomizev1.Kustomization{
+func NewOCIKustomizationObject(name string, namespace string) kustomizev1.Kustomization {
+	return kustomizev1.Kustomization{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
-			Namespace: "flux-system",
+			Namespace: namespace,
 		},
 		Spec: kustomizev1.KustomizationSpec{
 			Interval: v1.Duration{
@@ -69,10 +70,8 @@ func NewOCIKustomization(name string, image string, tag string) (sourcev1beta2.O
 			SourceRef: kustomizev1.CrossNamespaceSourceReference{
 				Kind:      "OCIRepository",
 				Name:      name,
-				Namespace: "flux-system",
+				Namespace: namespace,
 			},
 		},
 	}
-
-	return ocirepo, kustomizationOCI
 }
