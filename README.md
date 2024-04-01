@@ -60,7 +60,7 @@ The default k3d cluster config file is embeded in the binary, but can be found a
 
 ### Deploying Resources
 
-To deploy your own desired resources at runtime, use the `--deployment-directory`/`-d` flag and supply yaml manifests within that directory. At present moment, k3auto will attempt to cast the objects to know types and then use the ctrl client to apply it into the cluster. There is a known limitation with deploying additional CRDs that is actively being worked on.
+To deploy your own desired resources at runtime, use the `--deployment-directory`/`-d` flag and supply yaml manifests within that directory. At present moment, k3auto will capture that directory into an OCI Image, ship the image to the k3d registry, then create flux OCIRepository & Kustomization objects that will deploy your manifests into your cluster. A kustomization.yaml can be supplied within this directory if any kustomization changes are desired.
 
 
 ### Modifications
