@@ -48,10 +48,10 @@ Use "k3auto [command] --help" for more information about a command.
 ###  Cluster Deployment
 
 By default, k3auto will deploy a single node k3d cluster and will inject the following resources
-```
-metrics-server
-kube-state-metrics
-```
+- [metrics-server](https://github.com/kubernetes-sigs/metrics-server)
+- [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics)
+- [capacitor](https://github.com/gimlet-io/capacitor)
+
 
 To *only* deploy a the k3d cluster and flux controllers, use the `--minimal`/`-m` flag.
 
@@ -68,3 +68,7 @@ To deploy your own desired resources at runtime, use the `--deployment-directory
 To embed your own deployment manifests, just fork this repository. Then add your manifests to the `default/deployments` directory and rebuild.
 
 
+### Roadmap
+1. An `update` subcommand for refreshing user deployments
+2. Better image solution for OCI deployments (network registry layer is a current weak point)
+3. Standardize ingress solution

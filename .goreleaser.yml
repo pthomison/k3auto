@@ -4,6 +4,8 @@ builds:
   - env:
       - CGO_ENABLED=0
       - GO111MODULE=on
+    tags:
+      - containers_image_openpgp
     goos:
       - linux
       - darwin

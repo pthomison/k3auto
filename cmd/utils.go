@@ -73,6 +73,7 @@ func k3autoDeploy(ctx context.Context, name string, directory string, filesystem
 
 	tag := name
 	repository := fmt.Sprintf("%v:8888", machineIP)
+	localRepository := fmt.Sprintf("%v:8888", "127.0.0.1")
 	image := name
 	namespace := "kube-system"
 
@@ -83,7 +84,7 @@ func k3autoDeploy(ctx context.Context, name string, directory string, filesystem
 		return err
 	}
 
-	err = docker.PushImage(ctx, imageRef, repository)
+	err = docker.PushImage(ctx, imageRef, localRepository)
 	if err != nil {
 		return err
 	}
