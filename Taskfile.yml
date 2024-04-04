@@ -7,6 +7,10 @@ vars:
   REPOSITORY: "k3auto"
   IMAGE_TAG: "testing-{{.GIT_REV}}"
   IMAGE_REF: "{{.REGISTRY}}/{{.REPOSITORY}}:{{.IMAGE_TAG}}"
+  BUILD_FLAGS: "-tags containers_image_openpgp"
+
+env:
+  CGO_ENABLED: "0"
 
 tasks:
   rev: echo {{.GIT_REV}}
@@ -20,15 +24,15 @@ tasks:
 
   test:
     cmds:
-      - go test ./... -v --count=1
+      - go test {{.BUILD_FLAGS}} ./... -v --count=1
 
   hack:
     cmds:
-      - go test ./hack/... -v --count=1
+      - go test {{.BUILD_FLAGS}} ./hack/... -v --count=1
 
   e2e:
     cmds:
-      - go test ./e2e/... -v --count=1
+      - go test  {{.BUILD_FLAGS}} ./e2e/... -v --count=1 #-tag containers_image_openpgp
 
   docker-test-image:
     cmds:
@@ -42,6 +46,12 @@ tasks:
       - task: docker
         vars:
           DOCKER_CMD: task test
+
+  docker-e2e:
+    cmds:
+      - task: docker
+        vars:
+          DOCKER_CMD: task e2e
 
   docker-no-build-test:
     cmds:
@@ -62,6 +72,7 @@ tasks:
       - task: docker-no-build
         vars:
           DOCKER_CMD: "{{.DOCKER_CMD}}"
+          DOCKER_RUN_EXTRA_FLAGS: "{{.DOCKER_RUN_EXTRA_FLAGS}}"
 
   docker-no-build:
     cmds:

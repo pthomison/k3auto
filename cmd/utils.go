@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"net"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	defaults "github.com/pthomison/k3auto/default"
@@ -63,17 +66,19 @@ func lookupIpv4() (string, error) {
 	return "", errors.New("no ipv4 network detected")
 }
 
-func k3autoDeploy(ctx context.Context, name string, directory string, filesystem afero.Fs) error {
+func K3autoDeploy(ctx context.Context, name string, directory string, filesystem afero.Fs) error {
 	imageRef := fmt.Sprintf("%v:%v", name, name)
 
-	machineIP, err := lookupIpv4()
+	k8sC, err := k8s.NewClient()
 	if err != nil {
 		return err
 	}
 
 	tag := name
-	repository := fmt.Sprintf("%v:8888", machineIP)
-	localRepository := fmt.Sprintf("%v:8888", "127.0.0.1")
+
+	repository := fmt.Sprintf("%v:5000", "docker-registry.docker-registry.svc.cluster.local")
+	localRepository := fmt.Sprintf("%v:5000", "127.0.0.1")
+
 	image := name
 	namespace := "kube-system"
 
@@ -84,15 +89,33 @@ func k3autoDeploy(ctx context.Context, name string, directory string, filesystem
 		return err
 	}
 
+	dep := appsv1.Deployment{}
+	err = k8sC.Get(ctx, client.ObjectKey{
+		Name:      "docker-registry",
+		Namespace: "docker-registry",
+	}, &dep)
+	if err != nil {
+		return err
+	}
+
+	pods := corev1.PodList{}
+	var selector client.MatchingLabels = dep.Spec.Selector.MatchLabels
+	err = k8sC.List(ctx, &pods, selector)
+	if err != nil {
+		return err
+	}
+
+	closeChan, err := k8s.PortForward(ctx, pods.Items[0].Name, pods.Items[0].Namespace, 5000)
+	if err != nil {
+		return err
+	}
+
 	err = docker.PushImage(ctx, imageRef, localRepository)
 	if err != nil {
 		return err
 	}
 
-	k8sC, err := k8s.NewClient()
-	if err != nil {
-		return err
-	}
+	close(closeChan)
 
 	repo := flux.NewOCIRepoObject(name, namespace, repository, image, tag)
 	kustomization := flux.NewOCIKustomizationObject(name, namespace)

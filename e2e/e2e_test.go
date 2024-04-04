@@ -35,7 +35,7 @@ func init() {
 func SetupEnvironment(ctx context.Context) (func(ctx context.Context) error, error) {
 	// go cmd.CreateCmd.ExecuteContext(ctx)
 
-	cmd.K3AutoCmd.SetArgs([]string{"create"})
+	cmd.K3AutoCmd.SetArgs([]string{"create", "-d", "./e2e_deployments"})
 	go cmd.K3AutoCmd.ExecuteContext(ctx)
 
 	cleanupFn := func(ctx context.Context) error {

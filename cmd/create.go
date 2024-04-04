@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 
+	"github.com/davecgh/go-spew/spew"
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	k3druntimes "github.com/k3d-io/k3d/v5/pkg/runtimes"
 	defaults "github.com/pthomison/k3auto/default"
@@ -70,6 +71,20 @@ func injectFluxControllers(ctx context.Context) error {
 	return nil
 }
 
+func injectRegistry(ctx context.Context) error {
+	k8sC, err := k8s.NewClient()
+	if err != nil {
+		return err
+	}
+
+	err = k8s.CreateManifests(ctx, k8sC, defaults.RegistryDeployment)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func k3AutoCreate(cmd *cobra.Command, args []string) {
 	ctx := cmd.Context()
 	if ctx == nil {
@@ -90,22 +105,39 @@ func k3AutoCreate(cmd *cobra.Command, args []string) {
 	checkError(err)
 	logrus.Info("Flux Controllers Injected")
 
+	logrus.Info("Injecting Registry")
+	err = injectRegistry(ctx)
+	checkError(err)
+	logrus.Info("Registry Injected")
+
+	k8sC, err := k8s.NewClient()
+	checkError(err)
+
+	err = k8s.WaitForDeployment(ctx, k8sC, v1.ObjectMeta{
+		Name:      "docker-registry",
+		Namespace: "docker-registry",
+	})
+	checkError(err)
+
+	spew.Dump(MinimalFlag)
+
 	if !MinimalFlag {
 
 		logrus.Info("Injecting Default Deployments")
-		err = k3autoDeploy(ctx, "default", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
+		err = K3autoDeploy(ctx, "default", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
 		checkError(err)
 		logrus.Info("Default Deployments Injected")
 
-	}
+		spew.Dump(DeploymentDirectoryFlag)
 
-	if DeploymentDirectoryFlag != "" {
+		if DeploymentDirectoryFlag != "" {
+			logrus.Info("Injecting Directory Deployments")
+			err = K3autoDeploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
+			checkError(err)
 
-		logrus.Info("Injecting Directory Deployments")
-		err = k3autoDeploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
-		checkError(err)
+			logrus.Info("Directory Deployments Injected")
+		}
 
-		logrus.Info("Directory Deployments Injected")
 	}
 
 }

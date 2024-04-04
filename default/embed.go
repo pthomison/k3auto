@@ -8,6 +8,8 @@ const (
 	K3dConfigLocation = "k3d-config.yaml"
 
 	DefaultDeploymentsFolder = "deployments"
+
+	// RegistryDeploymentFolder = "registry"
 )
 
 var (
@@ -16,4 +18,7 @@ var (
 
 	//go:embed deployments/*
 	DefaultDeployments embed.FS
+
+	//go:embed registry/registry.yaml
+	RegistryDeployment string
 )

@@ -26,7 +26,8 @@ apt install -y\
   libsystemd-dev \
   netavark \
   pkg-config \
-  uidmap
+  uidmap \
+  libostree-dev
 
 RUN go install github.com/go-task/task/v3/cmd/task@latest
 RUN go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest && setup-envtest use

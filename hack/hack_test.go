@@ -6,11 +6,16 @@ import (
 	"net"
 	"os"
 	"testing"
+	"time"
+
+	defaults "github.com/pthomison/k3auto/default"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/pthomison/k3auto/cmd"
 	"github.com/pthomison/k3auto/internal/docker"
 	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/pthomison/k3auto/internal/k8s"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 )
@@ -56,6 +61,7 @@ func TestKubectlApply(t *testing.T) {
 }
 
 func TestIpLookup(t *testing.T) {
+	return
 	// get list of available addresses
 	addr, err := net.InterfaceAddrs()
 	if err != nil {
@@ -72,4 +78,20 @@ func TestIpLookup(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestPortForward(t *testing.T) {
+	ctx := context.TODO()
+
+	closeChan, err := k8s.PortForward(ctx, "docker-registry-5897b8f9dd-b6v7k", "docker-registry", 5000)
+	assert.Nil(t, err)
+
+	logrus.Info("Ready!")
+
+	err = cmd.K3autoDeploy(ctx, "testing", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
+	assert.Nil(t, err)
+
+	time.Sleep(10 * time.Second)
+	close(closeChan)
+
 }

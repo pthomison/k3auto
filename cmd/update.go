@@ -30,7 +30,7 @@ func k3AutoUpdate(cmd *cobra.Command, args []string) {
 	if !MinimalFlag {
 
 		logrus.Info("Injecting Default Deployments")
-		err = k3autoDeploy(ctx, "default", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
+		err = K3autoDeploy(ctx, "default", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
 		checkError(err)
 		logrus.Info("Default Deployments Injected")
 
@@ -39,7 +39,7 @@ func k3AutoUpdate(cmd *cobra.Command, args []string) {
 	if DeploymentDirectoryFlag != "" {
 
 		logrus.Info("Injecting Directory Deployments")
-		err = k3autoDeploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
+		err = K3autoDeploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
 		checkError(err)
 
 		logrus.Info("Directory Deployments Injected")
