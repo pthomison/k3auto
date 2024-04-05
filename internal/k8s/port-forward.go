@@ -49,17 +49,6 @@ func PortForward(ctx context.Context, name string, namespace string, port int) (
 	u.Host = "127.0.0.1:6443"
 
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", u)
-	// if cmdutil.PortForwardWebsockets.IsEnabled() {
-	// 	tunnelingDialer, err := portforward.NewSPDYOverWebsocketDialer(req.URL(), kcfg)
-	// 	assert.Nil(t, err)
-
-	// 	// First attempt tunneling (websocket) dialer, then fallback to spdy dialer.
-	// 	dialer = portforward.NewFallbackDialer(tunnelingDialer, dialer, httpstream.IsUpgradeFailure)
-	// }
-
-	// url := strings.Replace(req.URL().String(), "0.0.0.0", , -1)
-
-	// spew.Dump(url)
 
 	fw, err := portforward.New(dialer, []string{fmt.Sprintf("%v:%v", port, port)}, stopChan, readyChan, os.Stdout, os.Stderr)
 	if err != nil {

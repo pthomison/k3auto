@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/davecgh/go-spew/spew"
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	k3druntimes "github.com/k3d-io/k3d/v5/pkg/runtimes"
 	defaults "github.com/pthomison/k3auto/default"
@@ -119,20 +118,16 @@ func k3AutoCreate(cmd *cobra.Command, args []string) {
 	})
 	checkError(err)
 
-	spew.Dump(MinimalFlag)
-
 	if !MinimalFlag {
 
 		logrus.Info("Injecting Default Deployments")
-		err = K3autoDeploy(ctx, "default", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
+		err = Deploy(ctx, "default", defaults.DefaultDeploymentsFolder, afero.FromIOFS{FS: defaults.DefaultDeployments})
 		checkError(err)
 		logrus.Info("Default Deployments Injected")
 
-		spew.Dump(DeploymentDirectoryFlag)
-
 		if DeploymentDirectoryFlag != "" {
 			logrus.Info("Injecting Directory Deployments")
-			err = K3autoDeploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
+			err = Deploy(ctx, "deployments", DeploymentDirectoryFlag, afero.NewOsFs())
 			checkError(err)
 
 			logrus.Info("Directory Deployments Injected")

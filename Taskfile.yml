@@ -58,6 +58,7 @@ tasks:
       - task: docker-no-build
         vars:
           DOCKER_CMD: task test
+          DOCKER_API_VERSION: "1.44"
 
   docker-shell:
     cmds:
