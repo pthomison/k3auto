@@ -24,7 +24,7 @@ tasks:
 
   test:
     env:
-      DOCKER_API_VERSION: "1.44"
+      DOCKER_API_VERSION: "1.43"
     cmds:
       - go test {{.BUILD_FLAGS}} ./... -v --count=1
 
