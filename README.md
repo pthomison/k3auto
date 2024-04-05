@@ -34,6 +34,8 @@ Available Commands:
   create      Create a new K3D Cluster and inject flux controllers & deployments
   delete      Delete an existing cluster
   help        Help about any command
+  update      Reinject deployments
+  version     Prints the version, commit, & build date
 
 Flags:
   -c, --cluster-config string         Override Cluster Config File
@@ -69,6 +71,7 @@ To embed your own deployment manifests, just fork this repository. Then add your
 
 
 ### Roadmap
-1. An `update` subcommand for refreshing user deployments
-2. Better image solution for OCI deployments (network registry layer is a current weak point)
+1. ~~An `update` subcommand for refreshing user deployments~~ (Update now works!)
+2. ~~Better image solution for OCI deployments (network registry layer is a current weak point)~~ (Now registry lives within the cluster && k3auto port-forwards into the pod for connectivity)
 3. Standardize ingress solution
+4. Preloading base images to prevent excessive bandwidth consumption

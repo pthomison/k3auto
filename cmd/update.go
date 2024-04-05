@@ -11,7 +11,7 @@ import (
 
 var UpdateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Implementation Pending; Update the deployments in a cluster",
+	Short: "Reinject deployments",
 	Run:   k3AutoUpdate,
 }
 
@@ -22,10 +22,6 @@ func k3AutoUpdate(cmd *cobra.Command, args []string) {
 	}
 
 	var err error
-
-	// clusterConfig, err := parseConfigFile(ClusterConfigFileFlag)
-	// checkError(err)
-	// logrus.Info("K3D Config File Loaded: ", ClusterConfigFileFlag)
 
 	if !MinimalFlag {
 
