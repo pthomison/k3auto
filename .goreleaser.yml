@@ -6,6 +6,12 @@ builds:
       - GO111MODULE=on
     tags:
       - containers_image_openpgp
+    ldflags:
+      - |
+        -s -w
+        -X github.com/pthomison/k3auto/cmd.version={{.Version}}
+        -X github.com/pthomison/k3auto/cmd.commit={{.Commit}}
+        -X github.com/pthomison/k3auto/cmd.date={{.Date}}
     goos:
       - linux
       - darwin

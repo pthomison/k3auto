@@ -4,13 +4,11 @@ metadata:
   name: k3auto
 servers: 1
 image: docker.io/rancher/k3s:v1.29.1-k3s1
-# network: bridge
 kubeAPI:
-  # host: host.docker.internal
   hostPort: "6443"
 
 ports:
-  - port: 8080:80 # same as `--port '8080:80@loadbalancer'`
+  - port: 8080:80
     nodeFilters:
       - loadbalancer
 
@@ -18,7 +16,6 @@ options:
   k3d:
     wait: true
     timeout: 3m0s
-    # disableLoadbalancer: true
 
   k3s:
     extraArgs:
@@ -34,8 +31,3 @@ options:
     switchCurrentContext: true
 
   runtime: {}
-
-registries:
-  create:
-    name: k3auto-registry.localhost
-    hostPort: "8888"

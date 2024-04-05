@@ -8,8 +8,6 @@ const (
 	K3dConfigLocation = "k3d-config.yaml"
 
 	DefaultDeploymentsFolder = "deployments"
-
-	// RegistryDeploymentFolder = "registry"
 )
 
 var (

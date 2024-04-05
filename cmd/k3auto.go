@@ -17,13 +17,6 @@ var (
 	MinimalFlag             bool
 )
 
-// ldflag vars
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
-)
-
 func init() {
 	K3AutoCmd.PersistentFlags().StringVarP(&ClusterConfigFileFlag, "cluster-config", "c", "", "Override Cluster Config File")
 	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")

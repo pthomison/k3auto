@@ -24,25 +24,6 @@ func checkError(err error) {
 	}
 }
 
-// func lookupIpv4() (string, error) {
-// 	// get list of available addresses
-// 	addr, err := net.InterfaceAddrs()
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	for _, addr := range addr {
-// 		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-// 			// check if IPv4 or IPv6 is not nil
-// 			if ipnet.IP.To4() != nil {
-// 				// print available addresses
-// 				return ipnet.IP.String(), nil
-// 			}
-// 		}
-// 	}
-// 	return "", errors.New("no ipv4 network detected")
-// }
-
 func Deploy(ctx context.Context, name string, directory string, filesystem afero.Fs) error {
 	imageRef := fmt.Sprintf("%v:%v", name, name)
 
