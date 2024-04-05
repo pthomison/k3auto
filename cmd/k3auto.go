@@ -3,6 +3,7 @@ package cmd
 import (
 	_ "embed"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -25,5 +26,13 @@ func init() {
 	K3AutoCmd.AddCommand(VersionCmd)
 	K3AutoCmd.AddCommand(CreateCmd)
 	K3AutoCmd.AddCommand(DeleteCmd)
-	// K3AutoCmd.AddCommand(UpdateCmd)
+	K3AutoCmd.AddCommand(UpdateCmd)
+	// K3AutoCmd.AddCommand(ForwardCmd)
+}
+
+func checkError(err error) {
+	if err != nil {
+		logrus.Fatal(err)
+		panic(err)
+	}
 }

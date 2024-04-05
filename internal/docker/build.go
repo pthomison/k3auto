@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"io/fs"
@@ -12,10 +13,10 @@ import (
 	"github.com/spf13/afero"
 )
 
-func BuildImage(ctx context.Context, buildContextLocation string, dockerfile string, tags []string, filesystem afero.Fs) error {
+func BuildImage(ctx context.Context, buildContextLocation string, dockerfile string, tags []string, filesystem afero.Fs) (string, error) {
 	apiClient, err := NewClient()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer apiClient.Close()
 
@@ -30,12 +31,12 @@ func BuildImage(ctx context.Context, buildContextLocation string, dockerfile str
 		Size: int64(len([]byte(dockerfile))),
 	}
 	if err := tw.WriteHeader(hdr); err != nil {
-		return err
+		return "", err
 	}
 
 	_, err = tw.Write([]byte(dockerfile))
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = afero.Walk(filesystem, buildContextLocation, func(path string, info fs.FileInfo, err error) error {
@@ -69,12 +70,12 @@ func BuildImage(ctx context.Context, buildContextLocation string, dockerfile str
 		return nil
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = tw.Close()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	resp, err := apiClient.ImageBuild(ctx, &buf, types.ImageBuildOptions{
@@ -82,10 +83,15 @@ func BuildImage(ctx context.Context, buildContextLocation string, dockerfile str
 		Dockerfile: dockerFileLocation,
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	io.ReadAll(resp.Body)
+	resp.Body.Close()
 
-	return nil
+	hasher := sha256.New()
+	hasher.Write([]byte(buf.Bytes()))
+	hash := fmt.Sprintf("%x", hasher.Sum(nil))
+
+	return hash, nil
 }

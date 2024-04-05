@@ -18,9 +18,13 @@ tasks:
   image-registry: echo {{.REGISTRY}}
   image-repository: echo {{.REPOSITORY}}
 
-  run:
+  create:
     cmds:
-      - go run .
+      - go run {{.BUILD_FLAGS}} . create
+
+  delete:
+    cmds:
+      - go run {{.BUILD_FLAGS}} . delete
 
   test:
     env:
@@ -34,7 +38,7 @@ tasks:
 
   e2e:
     cmds:
-      - go test  {{.BUILD_FLAGS}} ./e2e/... -v --count=1 #-tag containers_image_openpgp
+      - go test  {{.BUILD_FLAGS}} ./e2e/... -v --count=1
 
   docker-test-image:
     cmds:
