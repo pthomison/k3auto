@@ -16,6 +16,7 @@ var (
 	ClusterConfigFileFlag   string
 	SecretConfigFileFlag    string
 	DeploymentDirectoryFlag string
+	BootstrapDirectoryFlag  string
 	MinimalFlag             bool
 )
 
@@ -23,6 +24,7 @@ func init() {
 	K3AutoCmd.PersistentFlags().StringVarP(&ClusterConfigFileFlag, "cluster-config", "c", "", "Override Cluster Config File")
 	K3AutoCmd.PersistentFlags().StringVarP(&SecretConfigFileFlag, "secret-config", "s", "", "Inject Secrets To the Cluster on Creation")
 	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")
+	K3AutoCmd.PersistentFlags().StringVarP(&BootstrapDirectoryFlag, "bootstrap-directory", "b", "/", "Folder Within The Deployment Directory To Bootstrap From")
 	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster & flux controllers")
 
 	K3AutoCmd.AddCommand(VersionCmd)

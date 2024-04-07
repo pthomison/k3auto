@@ -22,7 +22,7 @@ import (
 	sourcev1beta2 "github.com/fluxcd/source-controller/api/v1beta2"
 )
 
-func ensureDeployment(ctx context.Context, k8sC client.Client, name string, namespace string, repository string, image string, tag string) error {
+func ensureDeployment(ctx context.Context, k8sC client.Client, name string, namespace string, repository string, image string, tag string, path string) error {
 	oci := sourcev1beta2.OCIRepository{}
 	err := k8sC.Get(ctx, client.ObjectKey{
 		Name:      name,
@@ -55,7 +55,7 @@ func ensureDeployment(ctx context.Context, k8sC client.Client, name string, name
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err != nil {
-		kustomization = flux.NewOCIKustomizationObject(name, namespace)
+		kustomization = flux.NewOCIKustomizationObject(name, namespace, path)
 		err = k8sC.Create(ctx, &kustomization)
 		if err != nil {
 			return err
@@ -73,7 +73,7 @@ func ensureDeployment(ctx context.Context, k8sC client.Client, name string, name
 	return nil
 }
 
-func Deploy(ctx context.Context, name string, directory string, filesystem afero.Fs) error {
+func Deploy(ctx context.Context, name string, directory string, bootstrap string, filesystem afero.Fs) error {
 
 	k8sC, err := k8s.NewClient()
 	if err != nil {
@@ -131,7 +131,7 @@ func Deploy(ctx context.Context, name string, directory string, filesystem afero
 
 	close(closeChan)
 
-	err = ensureDeployment(ctx, k8sC, name, namespace, repository, image, tag)
+	err = ensureDeployment(ctx, k8sC, name, namespace, repository, image, tag, bootstrap)
 	if err != nil {
 		return err
 	}

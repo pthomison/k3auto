@@ -55,7 +55,7 @@ func NewOCIRepoObject(name string, namespace string, repository string, image st
 	}
 }
 
-func NewOCIKustomizationObject(name string, namespace string) kustomizev1.Kustomization {
+func NewOCIKustomizationObject(name string, namespace string, path string) kustomizev1.Kustomization {
 	return kustomizev1.Kustomization{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
@@ -65,7 +65,7 @@ func NewOCIKustomizationObject(name string, namespace string) kustomizev1.Kustom
 			Interval: v1.Duration{
 				Duration: time.Minute * 10,
 			},
-			Path:  "/",
+			Path:  path,
 			Prune: true,
 			SourceRef: kustomizev1.CrossNamespaceSourceReference{
 				Kind:      "OCIRepository",
