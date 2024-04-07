@@ -40,6 +40,7 @@ Available Commands:
   version     Prints the version, commit, & build date
 
 Flags:
+  -b, --bootstrap-directory string    Folder Within The Deployment Directory To Bootstrap From (default "/")
   -c, --cluster-config string         Override Cluster Config File
   -d, --deployment-directory string   Deployment Directory
   -h, --help                          help for k3auto
