@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"os"
 
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	k3druntimes "github.com/k3d-io/k3d/v5/pkg/runtimes"
@@ -9,6 +10,7 @@ import (
 	"github.com/pthomison/k3auto/internal/flux"
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/pthomison/k3auto/internal/k8s"
+	"github.com/pthomison/k3auto/internal/secrets"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -84,6 +86,26 @@ func injectRegistry(ctx context.Context) error {
 	return nil
 }
 
+func injectSecrets(ctx context.Context, k8sC ctrlclient.Client) error {
+	f, err := os.Open(SecretConfigFileFlag)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	conf, err := secrets.LoadConfigFile(f)
+	if err != nil {
+		return err
+	}
+
+	err = secrets.InjectSecrets(ctx, k8sC, conf)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func k3AutoCreate(cmd *cobra.Command, args []string) {
 	ctx := cmd.Context()
 	if ctx == nil {
@@ -117,6 +139,11 @@ func k3AutoCreate(cmd *cobra.Command, args []string) {
 		Namespace: "docker-registry",
 	})
 	checkError(err)
+
+	if SecretConfigFileFlag != "" {
+		err = injectSecrets(ctx, k8sC)
+		checkError(err)
+	}
 
 	if !MinimalFlag {
 

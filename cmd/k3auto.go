@@ -14,12 +14,14 @@ var K3AutoCmd = &cobra.Command{
 
 var (
 	ClusterConfigFileFlag   string
+	SecretConfigFileFlag    string
 	DeploymentDirectoryFlag string
 	MinimalFlag             bool
 )
 
 func init() {
 	K3AutoCmd.PersistentFlags().StringVarP(&ClusterConfigFileFlag, "cluster-config", "c", "", "Override Cluster Config File")
+	K3AutoCmd.PersistentFlags().StringVarP(&SecretConfigFileFlag, "secret-config", "s", "", "Inject Secrets To the Cluster on Creation")
 	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")
 	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster & flux controllers")
 

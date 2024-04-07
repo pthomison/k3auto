@@ -1,5 +1,6 @@
 {
     "yaml.schemas": {
-        "https://json.schemastore.org/github-workflow.json": "file:///Users/pthomison/Projects/k3auto/.github/workflows/goreleaser.yaml"
+        "https://json.schemastore.org/github-workflow.json": "file:///Users/pthomison/Projects/k3auto/.github/workflows/goreleaser.yaml",
+        "https://json.schemastore.org/yamllint.json": "file:///Users/pthomison/Projects/k3auto/internal/secrets/config.test.yaml"
     }
 }
