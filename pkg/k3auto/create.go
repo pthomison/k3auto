@@ -71,7 +71,7 @@ func Create(ctx context.Context, conf Config) (ctrlclient.Client, error) {
 
 		if conf.DeploymentDirectory != "" {
 			logrus.Info("Injecting Directory Deployments")
-			err = Deploy(ctx, "deployments", conf.DeploymentDirectory, conf.BootstrapDirectory, afero.NewOsFs())
+			err = Deploy(ctx, "deployments", conf.DeploymentDirectory, conf.BootstrapDirectory, conf.DeploymentFilesystem)
 			if err != nil {
 				return nil, err
 			}

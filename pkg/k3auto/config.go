@@ -4,14 +4,19 @@ import (
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
 	defaults "github.com/pthomison/k3auto/default"
 	"github.com/pthomison/k3auto/internal/k3d"
+	"github.com/spf13/afero"
 )
 
 type Config struct {
-	Minimal             bool
+	Minimal bool
+
 	DeploymentDirectory string
-	BootstrapDirectory  string
-	SecretFile          string
-	ClusterConfigFile   string
+
+	DeploymentFilesystem afero.Fs
+
+	BootstrapDirectory string
+	SecretFile         string
+	ClusterConfigFile  string
 }
 
 func ParseK3dConfigFile(configPath string) (*k3dv1alpha5.SimpleConfig, error) {

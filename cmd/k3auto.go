@@ -5,6 +5,7 @@ import (
 
 	"github.com/pthomison/k3auto/pkg/k3auto"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,9 @@ var (
 	// BootstrapDirectoryFlag  string
 	MinimalFlag bool
 
-	k3aConfig k3auto.Config = k3auto.Config{}
+	k3aConfig k3auto.Config = k3auto.Config{
+		DeploymentFilesystem: afero.NewOsFs(),
+	}
 )
 
 func init() {
