@@ -3,6 +3,7 @@ package cmd
 import (
 	_ "embed"
 
+	"github.com/pthomison/k3auto/pkg/k3auto"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -13,19 +14,21 @@ var K3AutoCmd = &cobra.Command{
 }
 
 var (
-	ClusterConfigFileFlag   string
-	SecretConfigFileFlag    string
-	DeploymentDirectoryFlag string
-	BootstrapDirectoryFlag  string
-	MinimalFlag             bool
+	// ClusterConfigFileFlag   string
+	// SecretConfigFileFlag    string
+	// DeploymentDirectoryFlag string
+	// BootstrapDirectoryFlag  string
+	MinimalFlag bool
+
+	k3aConfig k3auto.Config = k3auto.Config{}
 )
 
 func init() {
-	K3AutoCmd.PersistentFlags().StringVarP(&ClusterConfigFileFlag, "cluster-config", "c", "", "Override Cluster Config File")
-	K3AutoCmd.PersistentFlags().StringVarP(&SecretConfigFileFlag, "secret-config", "s", "", "Inject Secrets To the Cluster on Creation")
-	K3AutoCmd.PersistentFlags().StringVarP(&DeploymentDirectoryFlag, "deployment-directory", "d", "", "Deployment Directory")
-	K3AutoCmd.PersistentFlags().StringVarP(&BootstrapDirectoryFlag, "bootstrap-directory", "b", "/", "Folder Within The Deployment Directory To Bootstrap From")
-	K3AutoCmd.PersistentFlags().BoolVarP(&MinimalFlag, "minimal", "m", false, "Only deploy the k3d cluster & flux controllers")
+	K3AutoCmd.PersistentFlags().StringVarP(&k3aConfig.ClusterConfigFile, "cluster-config", "c", "", "Override Cluster Config File")
+	K3AutoCmd.PersistentFlags().StringVarP(&k3aConfig.SecretFile, "secret-config", "s", "", "Inject Secrets To the Cluster on Creation")
+	K3AutoCmd.PersistentFlags().StringVarP(&k3aConfig.DeploymentDirectory, "deployment-directory", "d", "", "Deployment Directory")
+	K3AutoCmd.PersistentFlags().StringVarP(&k3aConfig.BootstrapDirectory, "bootstrap-directory", "b", "/", "Folder Within The Deployment Directory To Bootstrap From")
+	K3AutoCmd.PersistentFlags().BoolVarP(&k3aConfig.Minimal, "minimal", "m", false, "Only deploy the k3d cluster & flux controllers")
 
 	K3AutoCmd.AddCommand(VersionCmd)
 	K3AutoCmd.AddCommand(CreateCmd)

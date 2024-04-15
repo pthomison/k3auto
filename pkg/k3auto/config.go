@@ -1,4 +1,4 @@
-package cmd
+package k3auto
 
 import (
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
@@ -6,7 +6,15 @@ import (
 	"github.com/pthomison/k3auto/internal/k3d"
 )
 
-func parseConfigFile(configPath string) (*k3dv1alpha5.SimpleConfig, error) {
+type Config struct {
+	Minimal             bool
+	DeploymentDirectory string
+	BootstrapDirectory  string
+	SecretFile          string
+	ClusterConfigFile   string
+}
+
+func ParseK3dConfigFile(configPath string) (*k3dv1alpha5.SimpleConfig, error) {
 	var clusterConfig *k3dv1alpha5.SimpleConfig
 	var err error
 

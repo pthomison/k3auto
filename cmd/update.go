@@ -3,9 +3,7 @@ package cmd
 import (
 	"context"
 
-	defaults "github.com/pthomison/k3auto/default"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/afero"
+	"github.com/pthomison/k3auto/pkg/k3auto"
 	"github.com/spf13/cobra"
 )
 
@@ -21,24 +19,5 @@ func k3AutoUpdate(cmd *cobra.Command, args []string) {
 		ctx = context.Background()
 	}
 
-	var err error
-
-	if !MinimalFlag {
-
-		logrus.Info("Injecting Default Deployments")
-		err = Deploy(ctx, "default", defaults.DefaultDeploymentsFolder, "/", afero.FromIOFS{FS: defaults.DefaultDeployments})
-		checkError(err)
-		logrus.Info("Default Deployments Injected")
-
-	}
-
-	if DeploymentDirectoryFlag != "" {
-
-		logrus.Info("Injecting Directory Deployments")
-		err = Deploy(ctx, "deployments", DeploymentDirectoryFlag, BootstrapDirectoryFlag, afero.NewOsFs())
-		checkError(err)
-
-		logrus.Info("Directory Deployments Injected")
-
-	}
+	checkError(k3auto.Update(ctx, k3aConfig))
 }
