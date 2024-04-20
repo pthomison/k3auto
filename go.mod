@@ -9,7 +9,7 @@ require (
 	github.com/fluxcd/flux2/v2 v2.2.3
 	github.com/fluxcd/helm-controller/api v0.37.4
 	github.com/fluxcd/kustomize-controller/api v1.2.2
-	github.com/fluxcd/source-controller/api v1.2.4
+	github.com/fluxcd/source-controller/api v1.2.5
 	github.com/k3d-io/k3d/v5 v5.6.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
