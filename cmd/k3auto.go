@@ -15,12 +15,6 @@ var K3AutoCmd = &cobra.Command{
 }
 
 var (
-	// ClusterConfigFileFlag   string
-	// SecretConfigFileFlag    string
-	// DeploymentDirectoryFlag string
-	// BootstrapDirectoryFlag  string
-	MinimalFlag bool
-
 	k3aConfig k3auto.Config = k3auto.Config{
 		DeploymentFilesystem: afero.NewOsFs(),
 	}
