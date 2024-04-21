@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apimachinerytypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/davecgh/go-spew/spew"
@@ -98,8 +97,7 @@ func ensureDeployment(ctx context.Context, k8sC client.Client, name string, name
 }
 
 func Deploy(ctx context.Context, name string, directory string, bootstrap string, filesystem afero.Fs) error {
-
-	k8sC, err := k8s.NewClient()
+	kcfg, k8sC, err := k8s.NewClient()
 	if err != nil {
 		return err
 	}
@@ -127,23 +125,10 @@ func Deploy(ctx context.Context, name string, directory string, bootstrap string
 		return err
 	}
 
-	dep := appsv1.Deployment{}
-	err = k8sC.Get(ctx, client.ObjectKey{
+	closeChan, err := k8s.PortForwardService(ctx, k8sC, kcfg, apimachinerytypes.NamespacedName{
 		Name:      "docker-registry",
 		Namespace: "docker-registry",
-	}, &dep)
-	if err != nil {
-		return err
-	}
-
-	pods := corev1.PodList{}
-	var selector client.MatchingLabels = dep.Spec.Selector.MatchLabels
-	err = k8sC.List(ctx, &pods, selector)
-	if err != nil {
-		return err
-	}
-
-	closeChan, err := k8s.PortForward(ctx, pods.Items[0].Name, pods.Items[0].Namespace, 5000)
+	}, 5000)
 	if err != nil {
 		return err
 	}

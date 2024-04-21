@@ -92,7 +92,7 @@ func InitializeCluster(ctx context.Context, config *k3dv1alpha5.SimpleConfig, ru
 	}
 
 	// Generate a k8s client from standard kubeconfig
-	k8sC, err := k8s.NewClient()
+	_, k8sC, err := k8s.NewClient()
 	if err != nil {
 		return nil, err
 	}
@@ -121,12 +121,7 @@ func InjectFluxControllers(ctx context.Context, k8sC ctrlclient.Client) error {
 }
 
 func InjectRegistry(ctx context.Context, k8sC ctrlclient.Client) error {
-	k8sC, err := k8s.NewClient()
-	if err != nil {
-		return err
-	}
-
-	err = k8s.CreateManifests(ctx, k8sC, defaults.RegistryDeployment)
+	err := k8s.CreateManifests(ctx, k8sC, defaults.RegistryDeployment)
 	if err != nil {
 		return err
 	}

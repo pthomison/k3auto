@@ -15,6 +15,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctlrconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 
@@ -24,71 +25,71 @@ import (
 	"github.com/pthomison/k3auto/internal/yaml"
 )
 
-func NewClient() (client.Client, error) {
+func NewClient() (*rest.Config, client.Client, error) {
 	kcfg, err := ctlrconfig.GetConfig()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	scheme := runtime.NewScheme()
 	err = clientgoscheme.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = kustomizev1.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	err = kustomizev1beta1.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	err = kustomizev1beta2.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = sourcev1.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	err = sourcev1beta2.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = sourcev1beta1.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = helmv2beta1.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	err = helmv2beta2.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = apiextensionsv1.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	err = apiextensionsv1beta1.AddToScheme(scheme)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	k8s, err := client.New(kcfg, client.Options{
 		Scheme: scheme,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return k8s, err
+	return kcfg, k8s, err
 }
 
 func CreateManifests(ctx context.Context, k8sC client.Client, manifests string) error {

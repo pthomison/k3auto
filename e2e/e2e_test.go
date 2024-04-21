@@ -55,7 +55,7 @@ func SetupEnvironment(ctx context.Context) (func(ctx context.Context) error, err
 	}
 
 	for {
-		k8sC, err := k8s.NewClient()
+		_, k8sC, err := k8s.NewClient()
 		if err == nil {
 			p := corev1.PodList{}
 			err = k8sC.List(ctx, &p)
@@ -93,7 +93,7 @@ func TestEndToEnd(t *testing.T) {
 	assert.Nil(t, err)
 
 	deploymentList := appsv1.DeploymentList{}
-	k8sC, err := k8s.NewClient()
+	_, k8sC, err := k8s.NewClient()
 	assert.Nil(t, err)
 
 	err = k8sC.List(ctx, &deploymentList)

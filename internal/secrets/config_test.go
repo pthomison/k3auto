@@ -17,7 +17,7 @@ func TestConfigLoad(t *testing.T) {
 	conf, err := LoadConfigFile(f)
 	assert.Nil(t, err)
 
-	k8sC, err := k8s.NewClient()
+	_, k8sC, err := k8s.NewClient()
 	assert.Nil(t, err)
 
 	err = InjectSecrets(context.TODO(), k8sC, conf)
