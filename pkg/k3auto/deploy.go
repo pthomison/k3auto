@@ -3,6 +3,7 @@ package k3auto
 import (
 	"context"
 	"fmt"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -23,11 +24,14 @@ import (
 )
 
 func ensureDeployment(ctx context.Context, k8sC client.Client, name string, namespace string, repository string, image string, tag string, path string) error {
-	oci := sourcev1beta2.OCIRepository{}
-	err := k8sC.Get(ctx, client.ObjectKey{
+
+	nameKey := client.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
-	}, &oci)
+	}
+
+	oci := sourcev1beta2.OCIRepository{}
+	err := k8sC.Get(ctx, nameKey, &oci)
 
 	if err != nil && !errors.IsNotFound(err) {
 		spew.Dump(errors.IsNotFound(err), err)
@@ -46,6 +50,16 @@ func ensureDeployment(ctx context.Context, k8sC client.Client, name string, name
 		}
 	}
 
+	reconcileChan, err := flux.ReconcileOCIRepository(ctx, k8sC, nameKey, 2*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	err = <-reconcileChan
+	if err != nil {
+		return err
+	}
+
 	kustomization := kustomizev1.Kustomization{}
 	err = k8sC.Get(ctx, client.ObjectKey{
 		Name:      name,
@@ -60,6 +74,16 @@ func ensureDeployment(ctx context.Context, k8sC client.Client, name string, name
 		if err != nil {
 			return err
 		}
+	}
+
+	reconcileChan, err = flux.ReconcileKustomization(ctx, k8sC, nameKey, 2*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	err = <-reconcileChan
+	if err != nil {
+		return err
 	}
 
 	err = flux.WaitForKustomization(ctx, k8sC, v1.ObjectMeta{

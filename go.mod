@@ -6,9 +6,11 @@ require (
 	github.com/containers/image/v5 v5.30.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/docker/docker v25.0.3+incompatible
+	github.com/fluxcd/cli-utils v0.36.0-flux.3
 	github.com/fluxcd/flux2/v2 v2.2.3
 	github.com/fluxcd/helm-controller/api v0.37.4
 	github.com/fluxcd/kustomize-controller/api v1.2.2
+	github.com/fluxcd/pkg/runtime v0.44.1
 	github.com/fluxcd/source-controller/api v1.2.5
 	github.com/k3d-io/k3d/v5 v5.6.0
 	github.com/sirupsen/logrus v1.9.3
@@ -130,7 +132,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/onsi/ginkgo/v2 v2.15.0 // indirect
+	github.com/onsi/gomega v1.31.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/opencontainers/runtime-spec v1.2.0 // indirect
