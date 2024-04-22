@@ -114,11 +114,11 @@ To embed your own deployment manifests, just fork this repository. Then add your
 ### Roadmap
 1. ~~An `update` subcommand for refreshing user deployments~~ (Update now works!)
 2. ~~Better image solution for OCI deployments (network registry layer is a current weak point)~~ (Now registry lives within the cluster && k3auto port-forwards into the pod for connectivity)
-3. Standardize ingress solution
+3. ~~Standardize ingress solution~~ (S/O localdomain.pthomison.com)
 4. Preloading base images to prevent excessive bandwidth consumption
-5. Secrets Management (In Progress)
+5. ~~Secrets Management~~
 6. Internal package testing
-7. Flux Reconciliation Requests
+7. ~~Flux Reconciliation Requests~~
 
 
 ### Project Learnings

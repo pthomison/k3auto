@@ -6,3 +6,4 @@ resources:
   - metrics-server.yaml
   - kube-state-metrics.yaml
   - flux-ui.yaml
+  - ingress-controller.yaml
