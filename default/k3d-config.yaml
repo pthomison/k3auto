@@ -3,7 +3,7 @@ kind: Simple
 metadata:
   name: k3auto
 servers: 1
-image: docker.io/rancher/k3s:v1.29.3-k3s1
+image: docker.io/rancher/k3s:v1.21.7-k3s1
 kubeAPI:
   hostPort: "6443"
 

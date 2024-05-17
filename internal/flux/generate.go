@@ -9,6 +9,7 @@ func GenerateManifests() (*manifestgen.Manifest, error) {
 	// Generate Flux Controller Manifests
 	genOps := install.MakeDefaultOptions()
 	genOps.NetworkPolicy = false
+	genOps.Version = "v2.2.3"
 	manifests, err := install.Generate(genOps, "")
 	if err != nil {
 		return nil, err
