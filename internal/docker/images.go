@@ -4,21 +4,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/image"
 )
 
-func GetImageByName(ctx context.Context, name string) (types.ImageSummary, error) {
+func GetImageByName(ctx context.Context, name string) (image.Summary, error) {
 	apiClient, err := NewClient()
 	if err != nil {
-		return types.ImageSummary{}, err
+		return image.Summary{}, err
 	}
 	defer apiClient.Close()
 
-	images, err := apiClient.ImageList(ctx, types.ImageListOptions{
+	images, err := apiClient.ImageList(ctx, image.ListOptions{
 		All: true,
 	})
 	if err != nil {
-		return types.ImageSummary{}, err
+		return image.Summary{}, err
 	}
 
 	for _, image := range images {
@@ -29,7 +29,7 @@ func GetImageByName(ctx context.Context, name string) (types.ImageSummary, error
 		}
 	}
 
-	return types.ImageSummary{}, fmt.Errorf("could not find the docker image named %v", name)
+	return image.Summary{}, fmt.Errorf("could not find the docker image named %v", name)
 }
 
 func TagImage(ctx context.Context, src string, dest string) error {

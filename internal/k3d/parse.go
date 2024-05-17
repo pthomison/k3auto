@@ -48,7 +48,7 @@ func LoadClusterConfig(ctx context.Context, rt k3druntimes.Runtime, cfg *k3dv1al
 		return nil, err
 	}
 
-	clusterConfig, err := k3dconfig.TransformSimpleToClusterConfig(ctx, rt, *cfg)
+	clusterConfig, err := k3dconfig.TransformSimpleToClusterConfig(ctx, rt, *cfg, "")
 	if err != nil {
 		return nil, err
 	}

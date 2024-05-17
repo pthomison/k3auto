@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 )
 
 func GetContainerByName(ctx context.Context, name string) (types.Container, error) {
@@ -14,7 +15,7 @@ func GetContainerByName(ctx context.Context, name string) (types.Container, erro
 	}
 	defer apiClient.Close()
 
-	containers, err := apiClient.ContainerList(ctx, types.ContainerListOptions{
+	containers, err := apiClient.ContainerList(ctx, container.ListOptions{
 		All: true,
 	})
 	if err != nil {
