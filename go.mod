@@ -14,7 +14,7 @@ require (
 	github.com/fluxcd/kustomize-controller/api v1.3.0
 	github.com/fluxcd/pkg/runtime v0.47.1
 	github.com/fluxcd/source-controller/api v1.3.0
-	github.com/k3d-io/k3d/v5 v5.6.4-0.20240419120359-64e52360a880
+	github.com/k3d-io/k3d/v5 v5.6.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
 	github.com/spf13/cobra v1.8.0

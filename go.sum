@@ -341,8 +341,8 @@ github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnr
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8/go.mod h1:vgyd7OREkbtVEN/8IXZe5Ooef3LQePvuBm9UWj6ZL8U=
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
-github.com/k3d-io/k3d/v5 v5.6.4-0.20240419120359-64e52360a880 h1:t7ac2sDepz6IXp6FJcJ0Uq/FZwfX7Zv9ljv5zUMgPz8=
-github.com/k3d-io/k3d/v5 v5.6.4-0.20240419120359-64e52360a880/go.mod h1:5w5q2jFKHCRV83M9TfJ4ePNzP/iEdQz6gatX6LN7CeY=
+github.com/k3d-io/k3d/v5 v5.6.3 h1:eF4SyprbdakywWQEj0Zz9AzCbQDxvGwEQ0LYcEkhxxE=
+github.com/k3d-io/k3d/v5 v5.6.3/go.mod h1:5w5q2jFKHCRV83M9TfJ4ePNzP/iEdQz6gatX6LN7CeY=
 github.com/karrick/godirwalk v1.8.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaRPx4tDPEn4=
 github.com/karrick/godirwalk v1.10.3/go.mod h1:RoGL9dQei4vP9ilrpETWE8CLOZ1kiN0LhBygSwrAsHA=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=

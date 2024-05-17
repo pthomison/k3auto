@@ -5,7 +5,6 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	k3dv1alpha5 "github.com/k3d-io/k3d/v5/pkg/config/v1alpha5"
-	k3dversion "github.com/k3d-io/k3d/v5/version"
 	defaults "github.com/pthomison/k3auto/default"
 	"github.com/pthomison/k3auto/internal/k3d"
 	"github.com/spf13/afero"
@@ -38,7 +37,7 @@ func ParseK3dConfigFile(configPath string) (*k3dv1alpha5.SimpleConfig, error) {
 		if err != nil {
 			return nil, err
 		}
-		clusterConfig.Image = fmt.Sprintf("docker.io/rancher/k3s:%v", k3dversion.K3sVersion)
+		clusterConfig.Image = fmt.Sprintf("docker.io/rancher/k3s:v1.29.4-k3s1")
 		spew.Dump(clusterConfig.Image)
 	}
 
