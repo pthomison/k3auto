@@ -3,7 +3,7 @@ module github.com/pthomison/k3auto
 go 1.22.0
 
 require (
-	github.com/containers/image/v5 v5.30.0
+	github.com/containers/image/v5 v5.30.1
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/docker/docker v25.0.3+incompatible
 	github.com/fluxcd/cli-utils v0.36.0-flux.7
