@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -18,15 +20,9 @@ import (
 	"k8s.io/client-go/transport/spdy"
 	"k8s.io/kubectl/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	ctlrconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 func PortForward(ctx context.Context, kcfg *rest.Config, name apimachinerytypes.NamespacedName, port int) (chan struct{}, error) {
-	kcfg, err := ctlrconfig.GetConfig()
-	if err != nil {
-		return nil, err
-	}
-
 	kcfg.GroupVersion = &schema.GroupVersion{Group: "api", Version: "v1"}
 	kcfg.APIPath = "/"
 
@@ -51,8 +47,19 @@ func PortForward(ctx context.Context, kcfg *rest.Config, name apimachinerytypes.
 	stopChan := make(chan struct{})
 	readyChan := make(chan struct{})
 
+	host := kcfg.Host
+	match, err := regexp.MatchString(`https://0\.0\.0\.0:\d{1,4}`, host)
+	if err != nil {
+		return nil, err
+	}
+	if match {
+		host = strings.Replace(host, "https://0.0.0.0", "127.0.0.1", -1)
+	} else {
+		host = strings.Replace(host, "https://", "", -1)
+	}
+
 	u := req.URL()
-	u.Host = "127.0.0.1:6443"
+	u.Host = host
 
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", u)
 
