@@ -6,12 +6,14 @@ import (
 )
 
 func YamlReadAndSplit(reader io.Reader) ([][]byte, error) {
-	r := regexp.MustCompile(`---\n`)
+	r := regexp.MustCompile(`\n---\n`)
 
 	fb, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
+
+	// fmt.Println(fb)
 
 	var objs [][]byte
 	for _, obj := range r.Split(string(fb), -1) {

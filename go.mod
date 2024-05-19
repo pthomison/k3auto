@@ -9,7 +9,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/docker/docker v26.1.3+incompatible
 	github.com/fluxcd/cli-utils v0.36.0-flux.7
-	github.com/fluxcd/flux2/v2 v2.2.3
+	github.com/fluxcd/flux2/v2 v2.3.0
 	github.com/fluxcd/helm-controller/api v1.0.1
 	github.com/fluxcd/kustomize-controller/api v1.3.0
 	github.com/fluxcd/pkg/runtime v0.47.1
@@ -25,7 +25,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.30.1
 	k8s.io/apimachinery v0.30.1
 	k8s.io/client-go v0.30.1
-	k8s.io/kubectl v0.30.1
+	k8s.io/kubectl v0.30.0
 	sigs.k8s.io/controller-runtime v0.18.2
 )
 
@@ -50,7 +50,7 @@ require (
 	github.com/containers/ocicrypt v1.1.9 // indirect
 	github.com/containers/storage v1.53.0 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20231217050601-ba74d44ecf5f // indirect
-	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
+	github.com/cyphar/filepath-securejoin v0.2.5 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/distribution/reference v0.5.0 // indirect
 	github.com/docker/cli v26.0.0+incompatible // indirect
@@ -66,8 +66,8 @@ require (
 	github.com/fluxcd/pkg/apis/acl v0.3.0 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v1.5.0 // indirect
 	github.com/fluxcd/pkg/apis/meta v1.5.0 // indirect
-	github.com/fluxcd/pkg/kustomize v1.6.0 // indirect
-	github.com/fluxcd/pkg/tar v0.4.0 // indirect
+	github.com/fluxcd/pkg/kustomize v1.11.0 // indirect
+	github.com/fluxcd/pkg/tar v0.7.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fvbommel/sortorder v1.1.0 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect

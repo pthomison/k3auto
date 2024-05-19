@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	helmv2beta1 "github.com/fluxcd/helm-controller/api/v2beta1"
 	helmv2beta2 "github.com/fluxcd/helm-controller/api/v2beta2"
 	kustomizev1 "github.com/fluxcd/kustomize-controller/api/v1"
@@ -103,13 +104,15 @@ func CreateManifests(ctx context.Context, k8sC client.Client, manifests string) 
 
 	for i := range rawObjs {
 
-		obj, _, err := decoder.Decode(rawObjs[i], nil, nil)
+		obj, t, err := decoder.Decode(rawObjs[i], nil, nil)
 		if err != nil {
 			return err
 		}
 
 		err = k8sC.Create(ctx, obj.(client.Object))
 		if err != nil {
+			spew.Dump(t, obj)
+
 			return err
 		}
 
