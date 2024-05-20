@@ -9,7 +9,7 @@ import (
 )
 
 func TestManifestGeneration(t *testing.T) {
-	manifests, err := flux.GenerateManifests()
+	manifests, err := flux.GenerateManifests("v2.3.0")
 	assert.Nil(t, err)
 
 	spew.Dump(manifests)

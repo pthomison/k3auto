@@ -17,6 +17,8 @@ type Config struct {
 	BootstrapDirectory string
 	SecretFile         string
 	ClusterConfigFile  string
+
+	FluxVersion string
 }
 
 func ParseK3dConfigFile(configPath string) (*k3dv1alpha5.SimpleConfig, error) {

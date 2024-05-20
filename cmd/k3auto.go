@@ -26,12 +26,12 @@ func init() {
 	K3AutoCmd.PersistentFlags().StringVarP(&k3aConfig.DeploymentDirectory, "deployment-directory", "d", "", "Deployment Directory")
 	K3AutoCmd.PersistentFlags().StringVarP(&k3aConfig.BootstrapDirectory, "bootstrap-directory", "b", "/", "Folder Within The Deployment Directory To Bootstrap From")
 	K3AutoCmd.PersistentFlags().BoolVarP(&k3aConfig.Minimal, "minimal", "m", false, "Only deploy the k3d cluster & flux controllers")
+	K3AutoCmd.PersistentFlags().StringVarP(&k3aConfig.FluxVersion, "flux-version", "v", "v2.3.0", "Flux Version To Deploy")
 
 	K3AutoCmd.AddCommand(VersionCmd)
 	K3AutoCmd.AddCommand(CreateCmd)
 	K3AutoCmd.AddCommand(DeleteCmd)
 	K3AutoCmd.AddCommand(UpdateCmd)
-	// K3AutoCmd.AddCommand(ForwardCmd)
 }
 
 func checkError(err error) {

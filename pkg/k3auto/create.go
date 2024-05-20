@@ -32,7 +32,7 @@ func Create(ctx context.Context, conf Config) (ctrlclient.Client, error) {
 	logrus.Info("Cluster Initialized")
 
 	logrus.Info("Injecting Flux Controllers")
-	err = InjectFluxControllers(ctx, k8sC)
+	err = InjectFluxControllers(ctx, k8sC, conf.FluxVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -61,24 +61,22 @@ func Create(ctx context.Context, conf Config) (ctrlclient.Client, error) {
 	}
 
 	if !conf.Minimal {
-
 		logrus.Info("Injecting Default Deployments")
 		err = Deploy(ctx, "default", defaults.DefaultDeploymentsFolder, "/", afero.FromIOFS{FS: defaults.DefaultDeployments})
 		if err != nil {
 			return nil, err
 		}
 		logrus.Info("Default Deployments Injected")
+	}
 
-		if conf.DeploymentDirectory != "" {
-			logrus.Info("Injecting Directory Deployments")
-			err = Deploy(ctx, "deployments", conf.DeploymentDirectory, conf.BootstrapDirectory, conf.DeploymentFilesystem)
-			if err != nil {
-				return nil, err
-			}
-
-			logrus.Info("Directory Deployments Injected")
+	if conf.DeploymentDirectory != "" {
+		logrus.Info("Injecting Directory Deployments")
+		err = Deploy(ctx, "deployments", conf.DeploymentDirectory, conf.BootstrapDirectory, conf.DeploymentFilesystem)
+		if err != nil {
+			return nil, err
 		}
 
+		logrus.Info("Directory Deployments Injected")
 	}
 
 	return k8sC, nil
@@ -106,8 +104,8 @@ func InitializeCluster(ctx context.Context, config *k3dv1alpha5.SimpleConfig, ru
 	return k8sC, err
 }
 
-func InjectFluxControllers(ctx context.Context, k8sC ctrlclient.Client) error {
-	fluxManifests, err := flux.GenerateManifests()
+func InjectFluxControllers(ctx context.Context, k8sC ctrlclient.Client, version string) error {
+	fluxManifests, err := flux.GenerateManifests(version)
 	if err != nil {
 		return err
 	}

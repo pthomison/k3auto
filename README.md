@@ -43,11 +43,13 @@ Flags:
   -b, --bootstrap-directory string    Folder Within The Deployment Directory To Bootstrap From (default "/")
   -c, --cluster-config string         Override Cluster Config File
   -d, --deployment-directory string   Deployment Directory
+  -v, --flux-version string           Flux Version To Deploy (default "v2.3.0")
   -h, --help                          help for k3auto
   -m, --minimal                       Only deploy the k3d cluster & flux controllers
   -s, --secret-config string          Inject Secrets To the Cluster on Creation
 
 Use "k3auto [command] --help" for more information about a command.
+
 
 ```
 
