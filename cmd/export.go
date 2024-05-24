@@ -15,6 +15,8 @@ import (
 
 var (
 	exportDirectory string
+	onlyControllers bool
+	onlyDeployments bool
 )
 
 var ExportCmd = &cobra.Command{
@@ -25,6 +27,8 @@ var ExportCmd = &cobra.Command{
 
 func init() {
 	ExportCmd.PersistentFlags().StringVarP(&exportDirectory, "export-directory", "e", ".", "Export Directory")
+	ExportCmd.PersistentFlags().BoolVar(&onlyControllers, "only-controllers", false, "")
+	ExportCmd.PersistentFlags().BoolVar(&onlyDeployments, "only-deployments", false, "")
 
 }
 
@@ -37,40 +41,45 @@ func k3AutoExport(cmd *cobra.Command, args []string) {
 	osfs := afero.OsFs{}
 	embedfs := afero.FromIOFS{FS: defaults.DefaultDeployments}
 
-	afero.Walk(embedfs, ".", func(path string, info fs.FileInfo, err error) error {
+	if !onlyControllers {
+		afero.Walk(embedfs, ".", func(path string, info fs.FileInfo, err error) error {
+			checkError(err)
+
+			p := filepath.Join(exportDirectory, path)
+			cp := filepath.Clean(strings.Replace(p, defaults.DefaultDeploymentsFolder, "", -1))
+
+			if !info.IsDir() {
+				b, err := afero.ReadFile(embedfs, path)
+				checkError(err)
+
+				if exists, _ := afero.Exists(osfs, cp); exists {
+					err = osfs.Remove(cp)
+					checkError(err)
+				}
+
+				err = afero.WriteFile(osfs, cp, b, info.Mode())
+				checkError(err)
+			} else {
+				err := osfs.Mkdir(cp, 0755)
+				if !errors.Is(err, afero.ErrFileExists) {
+					checkError(err)
+				}
+			}
+
+			return nil
+		})
+	}
+
+	if !onlyDeployments {
+		manifests, err := flux.GenerateManifests(k3aConfig.FluxVersion)
 		checkError(err)
 
-		p := filepath.Join(exportDirectory, path)
-		cp := filepath.Clean(strings.Replace(p, defaults.DefaultDeploymentsFolder, "", -1))
+		p := filepath.Join(exportDirectory, manifests.Path)
 
-		if !info.IsDir() {
-			b, err := afero.ReadFile(embedfs, path)
-			checkError(err)
+		osfs.MkdirAll(filepath.Dir(p), 0755)
 
-			if exists, _ := afero.Exists(osfs, cp); exists {
-				err = osfs.Remove(cp)
-				checkError(err)
-			}
+		err = afero.WriteFile(osfs, p, []byte(manifests.Content), 0644)
+		checkError(err)
+	}
 
-			err = afero.WriteFile(osfs, cp, b, info.Mode())
-			checkError(err)
-		} else {
-			err := osfs.Mkdir(cp, 0755)
-			if !errors.Is(err, afero.ErrFileExists) {
-				checkError(err)
-			}
-		}
-
-		return nil
-	})
-
-	manifests, err := flux.GenerateManifests("v2.3.0")
-	checkError(err)
-
-	p := filepath.Join(exportDirectory, manifests.Path)
-
-	osfs.MkdirAll(filepath.Dir(p), 0755)
-
-	err = afero.WriteFile(osfs, p, []byte(manifests.Content), 0644)
-	checkError(err)
 }
