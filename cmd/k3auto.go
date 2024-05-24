@@ -32,6 +32,7 @@ func init() {
 	K3AutoCmd.AddCommand(CreateCmd)
 	K3AutoCmd.AddCommand(DeleteCmd)
 	K3AutoCmd.AddCommand(UpdateCmd)
+	K3AutoCmd.AddCommand(ExportCmd)
 }
 
 func checkError(err error) {
