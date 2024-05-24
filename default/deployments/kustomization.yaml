@@ -3,7 +3,6 @@ kind: Kustomization
 commonAnnotations:
   deployment-type: default
 resources:
-  - metrics-server.yaml
-  - kube-state-metrics.yaml
-  - flux-ui.yaml
-  - ingress-controller.yaml
+  - metrics
+  - flux-ui
+  - ingress-controller
