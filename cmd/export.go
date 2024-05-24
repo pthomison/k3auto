@@ -37,7 +37,6 @@ func k3AutoExport(cmd *cobra.Command, args []string) {
 	embedfs := afero.FromIOFS{FS: defaults.DefaultDeployments}
 
 	afero.Walk(embedfs, ".", func(path string, info fs.FileInfo, err error) error {
-		spew.Dump(path)
 		checkError(err)
 
 		p := filepath.Join(exportDirectory, path)
