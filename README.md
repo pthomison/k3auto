@@ -35,6 +35,7 @@ Available Commands:
   completion  Generate the autocompletion script for the specified shell
   create      Create a new K3D Cluster and inject flux controllers & deployments
   delete      Delete an existing cluster
+  export      Export embeded resources
   help        Help about any command
   update      Reinject deployments
   version     Prints the version, commit, & build date
